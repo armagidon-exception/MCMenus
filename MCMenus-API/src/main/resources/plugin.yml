@@ -1,0 +1,4 @@
+name: MCMenus API
+version: ${project.version}
+main: ru.armagidon.mcmenusapi.MCMenusAPI
+api-version: 1.16
