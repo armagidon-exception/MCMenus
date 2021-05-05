@@ -1,10 +1,13 @@
 package ru.armagidon.mcmenusapi.style;
 
+import lombok.ToString;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@ToString
 public class Lore
 {
     private final List<String> lore;

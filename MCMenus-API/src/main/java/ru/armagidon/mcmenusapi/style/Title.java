@@ -1,7 +1,10 @@
 package ru.armagidon.mcmenusapi.style;
 
+import lombok.ToString;
+
 import java.util.Map;
 
+@ToString
 public class Title
 {
     private final String title;

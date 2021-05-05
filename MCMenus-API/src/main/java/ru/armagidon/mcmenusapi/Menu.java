@@ -1,26 +1,34 @@
 package ru.armagidon.mcmenusapi;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.jetbrains.annotations.NotNull;
-import ru.armagidon.mcmenusapi.style.MenuStyleSheet;
+import org.apache.commons.lang.Validate;
+import org.bukkit.entity.Player;
+import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 
-public class Menu implements InventoryHolder
+import java.util.HashMap;
+import java.util.Map;
+
+public class Menu
 {
-    private MenuModel model;
-    private MenuStyleSheet styleSheet;
-    private Inventory display;
+    private final Map<String, MenuPanel> panels = new HashMap<>();
+    private final Map<Player, MenuDisplay> menuViewers = new HashMap<>();
 
-    public void render() {
-        //TODO render menu
-        //Phase #1 Setting size of the menu
-        display = Bukkit.createInventory(this, styleSheet.getSize(), ChatColor.translateAlternateColorCodes('&', styleSheet.getTitle()));
+    public void open(Player player, String defaultPanel) {
+        MenuDisplay display = menuViewers.computeIfAbsent(player, p -> new MenuDisplay(this, p));
+        display.show(panels.get(defaultPanel));
     }
 
-    @Override
-    public @NotNull Inventory getInventory() {
-        return display;
+    public void closeInventory(Player player) {
+        menuViewers.remove(player);
     }
+
+    public void addPanel(String id, MenuPanel panel) {
+        Validate.notEmpty(id);
+        panels.put(id, panel);
+    }
+
+    public MenuPanel getPanel(String id) {
+        return panels.get(id);
+    }
+
+
 }

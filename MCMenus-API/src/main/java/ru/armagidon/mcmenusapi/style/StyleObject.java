@@ -1,9 +1,11 @@
 package ru.armagidon.mcmenusapi.style;
 
 import lombok.AllArgsConstructor;
+import lombok.ToString;
 import org.bukkit.ChatColor;
 
 import java.util.Map;
+
 
 public interface StyleObject
 {
@@ -11,6 +13,7 @@ public interface StyleObject
     String process(String input);
 
 
+    @ToString
     @AllArgsConstructor
     class PlaceHolderedStyle implements StyleObject {
 
@@ -28,6 +31,7 @@ public interface StyleObject
         }
     }
 
+    @ToString
     class StaticStyle implements StyleObject {
 
         @Override
