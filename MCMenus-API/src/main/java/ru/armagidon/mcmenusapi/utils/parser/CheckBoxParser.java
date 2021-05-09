@@ -8,6 +8,7 @@ import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.utils.parser.tags.CheckBoxTag;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 class CheckBoxParser implements ElementParser
@@ -18,7 +19,7 @@ class CheckBoxParser implements ElementParser
         Field[] fields = src.getClass().getDeclaredFields();
 
         Arrays.stream(fields).peek(f -> f.setAccessible(true)).filter(f -> f.isAnnotationPresent(CheckBoxTag.class))
-                .filter(f -> f.getType().equals(boolean.class) || f.getType().equals(Boolean.class)).forEach(f -> {
+                .filter(f -> f.getType().equals(boolean.class) || f.getType().equals(Boolean.class)).filter(f -> (f.getModifiers() & Modifier.STATIC) == 0).forEach(f -> {
 
             CheckBoxTag checkBoxData = f.getDeclaredAnnotation(CheckBoxTag.class);
 
@@ -30,14 +31,7 @@ class CheckBoxParser implements ElementParser
                 return;
             }
 
-            CheckButton checkBox = new CheckButton(checkBoxData.id(), offTexture, onTexture, checkBoxData.checked(), (state) -> {
-                try {
-                    f.set(src, state);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            });
-
+            CheckButton checkBox = new CheckBoxDecorator(checkBoxData.id(), offTexture, onTexture, checkBoxData.checked(), f, src);
             context.addElement(checkBox);
 
         });

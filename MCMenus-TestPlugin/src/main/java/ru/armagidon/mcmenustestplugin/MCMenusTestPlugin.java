@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.armagidon.mcmenusapi.elements.CheckButton;
 import ru.armagidon.mcmenusapi.menu.Menu;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.style.Title;
@@ -25,6 +26,7 @@ public final class MCMenusTestPlugin extends JavaPlugin {
         MenuParser.registerTexture(this, "link", new ItemStack(Material.ARROW));
         MenuParser.registerTexture(this, "checkbox-off", new ItemStack(Material.RED_CONCRETE));
         MenuParser.registerTexture(this, "checkbox-on", new ItemStack(Material.LIME_CONCRETE));
+        MenuParser.registerTexture(this, "icon", new ItemStack(Material.MAP));
 
     }
 
@@ -40,6 +42,9 @@ public final class MCMenusTestPlugin extends JavaPlugin {
         TestObject object = new TestObject(anotherPanel);
         MenuPanel panel = MenuParser.objectToPanel(this, object);
         panel.getStyleSheet().getStyle("test_button").setTitle(Title.of("TEST BUTTON"));
+
+        panel.getModel().getElement("test_checkbox").callback((e) -> sender.sendMessage("" + ((CheckButton) e).isChecked()));
+
         menu.addPanel(panel);
         menu.addPanel(anotherPanel);
         menu.open((Player) sender, "test_panel");

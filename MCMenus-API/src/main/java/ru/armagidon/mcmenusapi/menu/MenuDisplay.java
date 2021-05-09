@@ -96,6 +96,7 @@ public class MenuDisplay implements InventoryHolder
             MCMenusAPI.getInstance().getLogger().severe("Detected null menu element");
             return;
         }
-        element.handleClickEvent(event);
+        MenuDisplay where = (MenuDisplay) event.getInventory().getHolder();
+        element.handleClickEvent(where);
     }
 }

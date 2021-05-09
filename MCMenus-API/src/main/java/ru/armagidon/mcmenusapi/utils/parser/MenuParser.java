@@ -15,7 +15,7 @@ public class MenuParser {
 
     static final Map<NamespacedKey, ItemStack> textureRegistry = new HashMap<>();
 
-    private static final ImmutableSet<ElementParser> parsers = ImmutableSet.<ElementParser>builder().add(new ButtonParser(), new LinkParser(), new CheckBoxParser()).build();
+    private static final ImmutableSet<ElementParser> parsers = ImmutableSet.<ElementParser>builder().add(new ButtonParser(), new LinkParser(), new CheckBoxParser(), new IndicatorParser()).build();
 
     public static MenuPanel objectToPanel(Plugin plugin, Object obj) {
         Class<?> objectClass = obj.getClass();

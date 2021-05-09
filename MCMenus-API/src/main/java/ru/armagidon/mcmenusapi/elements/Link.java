@@ -1,7 +1,6 @@
 package ru.armagidon.mcmenusapi.elements;
 
 import org.apache.commons.lang.Validate;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.menu.MenuDisplay;
@@ -27,8 +26,7 @@ public class Link extends MenuElement
     }
 
     @Override
-    public void handleClickEvent(InventoryClickEvent data) {
-        MenuDisplay display = (MenuDisplay) data.getInventory().getHolder();
+    public void handleClickEvent(MenuDisplay display) {
         if (display == null) return;
         MenuPanel panel;
         if (locationURL != null) {

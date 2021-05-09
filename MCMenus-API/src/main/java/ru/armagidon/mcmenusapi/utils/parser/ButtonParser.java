@@ -1,10 +1,10 @@
 package ru.armagidon.mcmenusapi.utils.parser;
 
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ru.armagidon.mcmenusapi.MCMenusAPI;
 import ru.armagidon.mcmenusapi.elements.Button;
+import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.utils.parser.tags.ButtonTag;
 
@@ -20,7 +20,7 @@ class ButtonParser implements ElementParser
         Method[] methods = src.getClass().getDeclaredMethods();
 
         Arrays.stream(methods).peek(m -> m.setAccessible(true)).filter(m -> m.isAnnotationPresent(ButtonTag.class))
-                .filter(m -> m.getParameterTypes().length == 1 && m.getParameterTypes()[0].equals(InventoryClickEvent.class)).forEach(m -> {
+                .filter(m -> m.getParameterTypes().length == 1 && m.getParameterTypes()[0].equals(MenuDisplay.class)).forEach(m -> {
 
             ButtonTag buttonData = m.getDeclaredAnnotation(ButtonTag.class);
 

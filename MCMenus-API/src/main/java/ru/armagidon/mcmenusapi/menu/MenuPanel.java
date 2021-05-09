@@ -54,6 +54,14 @@ public class MenuPanel
         styleSheet.getTitle().render(context);
         context.setDisplay(Bukkit.createInventory(context, styleSheet.getSize() * MENU_WIDTH, styleSheet.getTitle().getTitle()));
         //Phase #2 Fixing problems
+        //Fixing out-of-bounds position of the elements
+        model.entrySet().stream().map(Map.Entry::getValue).map(el -> styleSheet.getStyle(el.getId())).forEach(style -> {
+            if (style.getSlot() >= styleSheet.getSize() * MENU_WIDTH) {
+                style.setSlot(styleSheet.getSize() * MENU_WIDTH - 1);
+            } else if (style.getSlot() < 0) {
+                style.setSlot(0);
+            }
+        });
         //Checking if some elements share the same slot
         Map<Integer, List<String>> sortedSlots = new TreeMap<>();
         model.entrySet().stream().map(Map.Entry::getValue).forEach(el -> {
