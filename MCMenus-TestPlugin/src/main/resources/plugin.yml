@@ -1,0 +1,8 @@
+name: MCMenusTestPlugin
+version: ${project.version}
+main: ru.armagidon.mcmenustestplugin.MCMenusTestPlugin
+api-version: 1.16
+softdepend:
+  - MCMenus-API
+commands:
+  testmenu:

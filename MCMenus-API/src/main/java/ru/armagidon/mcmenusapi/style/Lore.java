@@ -1,16 +1,19 @@
 package ru.armagidon.mcmenusapi.style;
 
 import lombok.ToString;
+import ru.armagidon.mcmenusapi.MCMenusAPI;
+import ru.armagidon.mcmenusapi.elements.Renderable;
+import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ToString
-public class Lore
+public class Lore implements Renderable
 {
-    private final List<String> lore;
+    private List<String> lore;
     private final StyleObject style;
 
     private Lore(List<String> lore, StyleObject style) {
@@ -19,15 +22,20 @@ public class Lore
     }
 
     public List<String> getLore() {
-        return lore.stream().map(style::process).collect(Collectors.toList());
+        return lore;
     }
 
     public static Lore of(String... lore) {
-        return new Lore(Arrays.asList(lore), new StyleObject.StaticStyle());
+        if (MCMenusAPI.isPAPILoaded()) {
+            return new Lore(Arrays.asList(lore), new StyleObject.PlaceHolderedStyle());
+        } else {
+            MCMenusAPI.getInstance().getLogger().severe("PlaceHolderAPI wasn't loaded. Placeholders won't be loaded.");
+            return new Lore(Arrays.asList(lore), new StyleObject.StaticStyle());
+        }
     }
 
-    public static Lore of(Map<String, String> placeholders, String... lore) {
-        return new Lore(Arrays.asList(lore), new StyleObject.PlaceHolderedStyle(placeholders));
+    @Override
+    public void render(MenuDisplay context) {
+        lore = lore.stream().map(string -> style.process(string, context)).collect(Collectors.toCollection(ArrayList::new));
     }
-
 }

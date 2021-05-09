@@ -1,33 +1,23 @@
 package ru.armagidon.mcmenusapi.style;
 
-import lombok.AllArgsConstructor;
 import lombok.ToString;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.ChatColor;
-
-import java.util.Map;
+import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 
 
 public interface StyleObject
 {
 
-    String process(String input);
+    String process(String input, MenuDisplay context);
 
 
     @ToString
-    @AllArgsConstructor
     class PlaceHolderedStyle implements StyleObject {
 
-        private final Map<String, String> placeholders;
-
         @Override
-        public String process(String input) {
-            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-                String placeholder = entry.getKey();
-                String value = entry.getValue();
-
-                input = input.replace(placeholder, value);
-            }
-            return ChatColor.translateAlternateColorCodes('&', input);
+        public String process(String input, MenuDisplay context) {
+            return ChatColor.translateAlternateColorCodes('&', PlaceholderAPI.setPlaceholders(context.getViewer(), input));
         }
     }
 
@@ -35,7 +25,7 @@ public interface StyleObject
     class StaticStyle implements StyleObject {
 
         @Override
-        public String process(String input) {
+        public String process(String input, MenuDisplay context) {
             return ChatColor.translateAlternateColorCodes('&', input);
         }
     }

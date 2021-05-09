@@ -2,7 +2,7 @@ package ru.armagidon.mcmenusapi.style;
 
 import lombok.Getter;
 import org.apache.commons.lang.Validate;
-import ru.armagidon.mcmenusapi.MenuPanel;
+import ru.armagidon.mcmenusapi.menu.MenuPanel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +11,14 @@ public class MenuStyleSheet
 {
     private final MenuPanel context;
 
-    @Getter private String title;
-    @Getter private int size;
+    @Getter private Title title;
+    @Getter private int size = 1;
 
     private final Map<String, Style> objectsStyleSheet = new HashMap<>();
 
     public MenuStyleSheet(MenuPanel context) {
         this.context = context;
+        this.title = Title.of("");
     }
 
     public Style getStyle(String id) {
@@ -30,14 +31,15 @@ public class MenuStyleSheet
     }
 
     public void setSize(int size) {
-        this.size = size;
-        //context.refresh();
+        if (size > 0)
+            this.size = size;
+        context.update();
     }
 
-    public void setTitle(String title) {
-        Validate.notEmpty(title);
+    public void setTitle(Title title) {
+        Validate.notNull(title);
         this.title = title;
-        //context.refresh();
+        context.update();
     }
 
     @Override

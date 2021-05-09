@@ -1,15 +1,15 @@
-package ru.armagidon.mcmenusapi.menuelements;
+package ru.armagidon.mcmenusapi.elements;
 
 import lombok.ToString;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 @ToString
 public class MenuModel
 {
-    private final Map<String, MenuElement> elements = new HashMap<>();
+    private final Map<String, MenuElement> elements = new LinkedHashMap<>();
 
     /**
      * Adds given menu element to current menu model

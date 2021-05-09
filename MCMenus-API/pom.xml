@@ -15,10 +15,6 @@
 
     <name>MCMenus API</name>
 
-    <properties>
-
-    </properties>
-
     <repositories>
         <repository>
             <id>papermc-repo</id>

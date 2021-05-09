@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.menuelements;
+package ru.armagidon.mcmenusapi.elements;
 
 import lombok.Getter;
 import org.apache.commons.lang.Validate;
@@ -8,7 +8,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import ru.armagidon.mcmenusapi.MCMenusAPI;
-import ru.armagidon.mcmenusapi.MenuPanel;
 import ru.armagidon.mcmenusapi.style.Style;
 
 public abstract class MenuElement
@@ -23,7 +22,7 @@ public abstract class MenuElement
         this.id = id;
     }
 
-    public abstract void onClick(InventoryClickEvent event);
+    public abstract void handleClickEvent(InventoryClickEvent event);
 
     public void applyStyle(Style style) {
         ItemMeta meta = item.getItemMeta();
@@ -35,7 +34,7 @@ public abstract class MenuElement
 
     public void render(Style contextStyle, Inventory frame) {
         applyStyle(contextStyle);
-        frame.setItem(contextStyle.getX() + contextStyle.getY() * MenuPanel.MENU_WIDTH, item);
+        frame.setItem(contextStyle.getSlot(), item);
     }
 
     public void setItem(ItemStack item) {

@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.menuelements;
+package ru.armagidon.mcmenusapi.elements;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +16,7 @@ public class Button extends MenuElement
     }
 
     @Override
-    public void onClick(InventoryClickEvent data) {
+    public void handleClickEvent(InventoryClickEvent data) {
         clickEvent.accept(data);
     }
 }

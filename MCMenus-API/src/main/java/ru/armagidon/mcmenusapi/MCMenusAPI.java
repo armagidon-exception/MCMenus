@@ -12,11 +12,14 @@ public final class MCMenusAPI extends JavaPlugin {
     @Getter
     public static MCMenusAPI instance;
 
+    @Getter private static boolean isPAPILoaded = false;
+
     @Override
     public void onEnable() {
         instance = this;
         ID_KEY = new NamespacedKey(this, "element_id");
         getServer().getPluginManager().registerEvents(new MenuHandler(), this);
+        isPAPILoaded = getServer().getPluginManager().getPlugin("PlaceHolderAPI") != null;
     }
 
     @Override

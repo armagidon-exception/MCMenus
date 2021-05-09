@@ -1,13 +1,14 @@
 package ru.armagidon.mcmenusapi.style;
 
 import lombok.ToString;
-
-import java.util.Map;
+import ru.armagidon.mcmenusapi.MCMenusAPI;
+import ru.armagidon.mcmenusapi.elements.Renderable;
+import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 
 @ToString
-public class Title
+public class Title implements Renderable
 {
-    private final String title;
+    private String title;
     private final StyleObject style;
 
     private Title(String title, StyleObject style) {
@@ -16,14 +17,20 @@ public class Title
     }
 
     public String getTitle() {
-        return style.process(title);
+        return title;
     }
 
     public static Title of(String input) {
-        return new Title(input, new StyleObject.StaticStyle());
+        if (MCMenusAPI.isPAPILoaded()) {
+            return new Title(input, new StyleObject.PlaceHolderedStyle());
+        } else {
+            MCMenusAPI.getInstance().getLogger().severe("PlaceHolderAPI wasn't loaded. Placeholders won't be loaded.");
+            return new Title(input, new StyleObject.StaticStyle());
+        }
     }
 
-    public static Title of(String input, Map<String, String> placeholders) {
-        return new Title(input, new StyleObject.PlaceHolderedStyle(placeholders));
+    @Override
+    public void render(MenuDisplay context) {
+        title = style.process(title, context);
     }
 }

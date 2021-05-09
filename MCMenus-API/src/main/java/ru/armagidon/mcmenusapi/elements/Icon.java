@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.menuelements;
+package ru.armagidon.mcmenusapi.elements;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -12,5 +12,5 @@ public class Icon extends MenuElement
     }
 
     @Override
-    public void onClick(InventoryClickEvent event) {}
+    public void handleClickEvent(InventoryClickEvent event) {}
 }
