@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import com.google.common.collect.ImmutableSet;
 import org.bukkit.NamespacedKey;
@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.style.Title;
-import ru.armagidon.mcmenusapi.utils.parser.tags.PanelTag;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.PanelTag;
 
 import java.util.HashMap;
 import java.util.Map;

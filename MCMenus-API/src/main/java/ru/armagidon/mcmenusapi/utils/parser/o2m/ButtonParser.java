@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -6,7 +6,7 @@ import ru.armagidon.mcmenusapi.MCMenusAPI;
 import ru.armagidon.mcmenusapi.elements.Button;
 import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
-import ru.armagidon.mcmenusapi.utils.parser.tags.ButtonTag;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.ButtonTag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

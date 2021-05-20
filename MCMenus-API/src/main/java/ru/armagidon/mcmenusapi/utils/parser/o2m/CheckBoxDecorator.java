@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import lombok.SneakyThrows;
 import org.bukkit.inventory.ItemStack;

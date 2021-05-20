@@ -2,7 +2,7 @@ package ru.armagidon.mcmenustestplugin;
 
 import ru.armagidon.mcmenusapi.menu.MenuDisplay;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
-import ru.armagidon.mcmenusapi.utils.parser.tags.*;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.*;
 
 @PanelTag(id = "test_panel", title = "&3Menu of player %player_name%")
 public class TestObject

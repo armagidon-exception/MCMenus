@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser.tags;
+package ru.armagidon.mcmenusapi.utils.parser.o2m.tags;
 
 
 import java.lang.annotation.ElementType;

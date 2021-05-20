@@ -10,7 +10,7 @@ import ru.armagidon.mcmenusapi.elements.CheckButton;
 import ru.armagidon.mcmenusapi.menu.Menu;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.style.Title;
-import ru.armagidon.mcmenusapi.utils.parser.MenuParser;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.MenuParser;
 
 import java.util.Collections;
 

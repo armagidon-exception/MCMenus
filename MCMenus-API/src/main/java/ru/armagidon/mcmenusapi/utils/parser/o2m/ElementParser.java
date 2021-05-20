@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import org.bukkit.plugin.Plugin;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;

@@ -13,6 +13,7 @@ import ru.armagidon.mcmenusapi.style.Lore;
 import ru.armagidon.mcmenusapi.style.MenuStyleSheet;
 import ru.armagidon.mcmenusapi.style.Style;
 import ru.armagidon.mcmenusapi.style.Title;
+import ru.armagidon.mcmenusapi.utils.parser.f2m.Exclude;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,10 +26,12 @@ public class MenuPanel
 
     @Setter private MenuModel model;
     @Setter private MenuStyleSheet styleSheet;
-    @Getter private final String id;
+    @Exclude @Getter private final String id;
 
+    @Exclude
     private final Map<Player, MenuDisplay> viewers = new HashMap<>();
 
+    @Exclude
     @Setter(value = AccessLevel.PACKAGE)
     @Getter private Menu parent;
 
@@ -126,17 +129,6 @@ public class MenuPanel
     public MenuStyleSheet getStyleSheet() {
         return styleSheet;
     }
-
-
-
-
-
-
-
-
-
-
-
 
     private int getFreeSlot() {
         Set<Integer> occupiedSlots = model.entrySet().stream().map(Map.Entry::getValue).map(el ->

@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import com.google.common.reflect.TypeToken;
 import org.bukkit.inventory.ItemStack;
@@ -9,7 +9,7 @@ import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.style.Lore;
 import ru.armagidon.mcmenusapi.style.Style;
 import ru.armagidon.mcmenusapi.style.Title;
-import ru.armagidon.mcmenusapi.utils.parser.tags.IconTag;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.IconTag;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

@@ -1,11 +1,11 @@
-package ru.armagidon.mcmenusapi.utils.parser;
+package ru.armagidon.mcmenusapi.utils.parser.o2m;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import ru.armagidon.mcmenusapi.MCMenusAPI;
 import ru.armagidon.mcmenusapi.elements.Link;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
-import ru.armagidon.mcmenusapi.utils.parser.tags.LinkTag;
+import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.LinkTag;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
