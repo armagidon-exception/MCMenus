@@ -4,126 +4,77 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import ru.armagidon.mcmenusapi.elements.MenuDOM;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
-import ru.armagidon.mcmenusapi.elements.MenuModel;
-import ru.armagidon.mcmenusapi.style.Lore;
+import ru.armagidon.mcmenusapi.misc.MenuAPIConstants;
+import ru.armagidon.mcmenusapi.style.ElementStyle;
 import ru.armagidon.mcmenusapi.style.MenuStyleSheet;
-import ru.armagidon.mcmenusapi.style.Style;
-import ru.armagidon.mcmenusapi.style.Title;
-import ru.armagidon.mcmenusapi.utils.parser.f2m.Exclude;
+import ru.armagidon.mcmenusapi.style.PlaceholderProcessingContext;
+import ru.armagidon.mcmenusapi.style.attributes.Lore;
+import ru.armagidon.mcmenusapi.style.attributes.TextureAttribute;
+import ru.armagidon.mcmenusapi.style.attributes.Title;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @ToString
-public class MenuPanel
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class MenuPanel implements InventoryHolder
 {
 
-    public static final int MENU_WIDTH = 9;
+    final MenuDOM menuDOM;
+    final MenuStyleSheet styleSheet;
+    @Getter final String id;
+    volatile Inventory display;
+    final Player viewer;
+    volatile boolean shown;
 
-    @Setter private MenuModel model;
-    @Setter private MenuStyleSheet styleSheet;
-    @Exclude @Getter private final String id;
-
-    @Exclude
-    private final Map<Player, MenuDisplay> viewers = new HashMap<>();
-
-    @Exclude
-    @Setter(value = AccessLevel.PACKAGE)
-    @Getter private Menu parent;
-
-    public MenuPanel(String id) {
+    public MenuPanel(String id, Player viewer) {
         Validate.notEmpty(id);
-        styleSheet = new MenuStyleSheet(this);
-        model = new MenuModel();
+        this.viewer = viewer;
         this.id = id;
+        this.styleSheet = new MenuStyleSheet();
+        this.menuDOM = new MenuDOM();
     }
 
-    void show(Player player) {
-        MenuDisplay display = viewers.computeIfAbsent(player, p -> new MenuDisplay(this, p));
-        display.show(this);
+    public synchronized void show() {
+        shown = true;
+        render();
+        viewer.openInventory(display);
     }
 
-    public void handleClosure(Player player) {
-        viewers.remove(player);
+    void close() {
+        shown = false;
     }
 
 
-    public void render(MenuDisplay context) {
-        //Phase #1 Setting size of the menu
-        styleSheet.getTitle().render(context);
-        context.setDisplay(Bukkit.createInventory(context, styleSheet.getSize() * MENU_WIDTH, styleSheet.getTitle().getTitle()));
-        //Phase #2 Fixing problems
-        //Fixing out-of-bounds position of the elements
-        model.entrySet().stream().map(Map.Entry::getValue).map(el -> styleSheet.getStyle(el.getId())).forEach(style -> {
-            if (style.getSlot() >= styleSheet.getSize() * MENU_WIDTH) {
-                style.setSlot(styleSheet.getSize() * MENU_WIDTH - 1);
-            } else if (style.getSlot() < 0) {
-                style.setSlot(0);
-            }
-        });
-        //Checking if some elements share the same slot
-        Map<Integer, List<String>> sortedSlots = new TreeMap<>();
-        model.entrySet().stream().map(Map.Entry::getValue).forEach(el -> {
-            Style style = styleSheet.getStyle(el.getId());
-            List<String> s = sortedSlots.computeIfAbsent(style.getSlot(), (i) -> new LinkedList<>());
-            s.add(el.getId());
-        });
-
-        for (List<String> list : sortedSlots.values()) {
-            if (list.size() > 1) {
-                int counter = 0;
-                LinkedList<MenuElement> elements = list.stream().map(el -> model.getElement(el)).collect(Collectors.toCollection(LinkedList::new));
-                for (MenuElement menuElement : elements) {
-                    Style style = styleSheet.getStyle(menuElement.getId());
-                    int slot  = style.getSlot() + (counter++);
-                    if (slot >= styleSheet.getSize() * MENU_WIDTH) {
-                        style.setSlot(getFreeSlot());
-                    } else
-                        style.setSlot(slot);
-                }
-            }
-        }
-
-        //Phase #3 Putting elements
-        model.entrySet().forEach(entry -> {
-            Style style = styleSheet.getStyle(entry.getKey());
-            MenuElement element = entry.getValue();
-            style.getTitle().render(context);
-            style.getLore().render(context);
-            element.render(style, context.getInventory());
-        });
-    }
-
-    public void reRender(MenuDisplay context) {
-        model.entrySet().forEach(entry -> {
-            Style style = styleSheet.getStyle(entry.getKey());
-            MenuElement element = entry.getValue();
-
-            element.render(style, context.getInventory());
-        });
-    }
-
-    public void update() {
-        viewers.values().forEach(display -> display.refresh(MenuDisplay.FULL_RERENDER));
+    public void render() {
+        refresh(true);
     }
 
     public void addElement(MenuElement element) {
-        int freeSlot = getFreeSlot();
-
-        model.addElement(element);
-
-        Style style = new Style(Title.of(""), Lore.of(""));
-        style.setSlot(freeSlot);
-
-        styleSheet.setStyle(element.getId(), style);
+        ElementStyle elementStyle = new ElementStyle(Title.of(""), Lore.of(""));
+        addElement(element, elementStyle);
     }
 
-    public MenuModel getModel() {
-        return model;
+    public MenuDOM getMenuDOM() {
+        return menuDOM;
     }
 
     public MenuStyleSheet getStyleSheet() {
@@ -131,14 +82,113 @@ public class MenuPanel
     }
 
     private int getFreeSlot() {
-        Set<Integer> occupiedSlots = model.entrySet().stream().map(Map.Entry::getValue).map(el ->
-                styleSheet.getStyle(el.getId()).getSlot()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        return IntStream.
+                rangeClosed(1, getStyleSheet().getHeadStyle().getMenuSize() * getStyleSheet().getHeadStyle().getMenuLookType().getElementsMinimum())
+                .filter(i -> menuDOM.entrySet().stream().map(Map.Entry::getValue).map(MenuElement::getSlot).noneMatch(s -> s == i))
+                .findFirst().getAsInt();
+    }
 
-        Set<Integer> slots = new HashSet<>();
-        for (int i = 0; i < MENU_WIDTH * styleSheet.getSize(); i++) {
-            slots.add(i);
+    //Refreshing
+    public synchronized void setCanvas(String title, int size, InventoryType type) {
+        title = styleSheet.getHeadStyle().getPlaceHolderProcessor().apply(new PlaceholderProcessingContext(viewer), color(title));
+        if (type.equals(InventoryType.CHEST))
+            display = Bukkit.createInventory(this, size, title);
+        else
+            display = Bukkit.createInventory(this, type, title);
+    }
+
+    @NotNull
+    @Override
+    public Inventory getInventory() {
+        return display;
+    }
+
+    //Setting item
+    public void setElement(int slot, MenuElement element) {
+        ElementStyle elementStyle = styleSheet.getStyle(element.getId());
+
+        if (slot < 1) slot = 1;
+
+        ItemStack item = element.getItem();
+        if (item == null) {
+            item = new ItemStack(elementStyle.getAttribute(TextureAttribute.class).get());
         }
 
-        return slots.stream().filter(s -> !occupiedSlots.contains(s)).sorted().findFirst().get();
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(MenuAPIConstants.uiElementInventoryTag(), PersistentDataType.STRING, element.getId());
+        String title = styleSheet.getHeadStyle()
+                .getPlaceHolderProcessor()
+                .apply(new PlaceholderProcessingContext(viewer), color(elementStyle.getAttribute(Title.class).get()));
+
+        List<String> lore = elementStyle.getAttribute(Lore.class)
+                .get().stream().map(MenuPanel::color)
+                .map(s -> styleSheet.getHeadStyle().getPlaceHolderProcessor().apply(new PlaceholderProcessingContext(viewer), s))
+                .toList();
+        if (lore.isEmpty()) lore.addAll(meta.getLore());
+        if (title.isEmpty() || title.isBlank()) title = meta.getDisplayName();
+
+        meta.setDisplayName(title);
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+
+        display.setItem(slot - 1, element.getItem());
+        viewer.updateInventory();
+    }
+
+    private static String color(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+
+    public void refresh(boolean rerender) {
+        if (!shown) return;
+        final int menuSize = styleSheet.getHeadStyle().getMenuSize() * styleSheet.getHeadStyle().getMenuLookType().getElementsMinimum();
+        if (rerender) {
+            //Phase #1 Setting menu's properties
+            String menuTitle = styleSheet.getHeadStyle().getMenuTitle().get();
+            InventoryType inventoryType = styleSheet.getHeadStyle().getMenuLookType().getInventoryType();
+            setCanvas(menuTitle, menuSize, inventoryType);
+        } else {
+            display.clear();
+        }
+        //Phase #2 Fixing problems
+        //Fixing out-of-bounds position of the elements
+        menuDOM.entrySet().stream().map(Map.Entry::getValue)
+                .forEach(elementStyle -> elementStyle.setSlot(getFreeSlot()));
+        //Checking if some elements share the same slot
+        Map<Integer, List<String>> sortedSlots = new TreeMap<>();
+        menuDOM.entrySet().stream().map(Map.Entry::getValue)
+                .forEach(element -> {
+                    List<String> s = sortedSlots.computeIfAbsent(element.getSlot(), (i) -> new LinkedList<>());
+                    s.add(element.getId());
+                });
+
+        for (List<String> repeatingElements : sortedSlots.values()) {
+            if (repeatingElements.size() > 1) {
+                int counter = 0;
+                LinkedList<MenuElement> elements = repeatingElements.stream().map(menuDOM::getElement).collect(Collectors.toCollection(LinkedList::new));
+                for (MenuElement menuElement : elements) {
+                    int slot  = menuElement.getSlot() + (counter++);
+                    if (slot >= menuSize) {
+                        menuElement.setSlot(getFreeSlot());
+                    } else
+                        menuElement.setSlot(slot);
+                }
+            }
+        }
+        //Phase #3 Putting elements
+        menuDOM.entrySet().forEach(entry -> {
+            MenuElement element = entry.getValue();
+            setElement(element.getSlot(), element);
+        });
+    }
+
+    public void addElement(MenuElement element, ElementStyle style) {
+        int freeSlot = getFreeSlot();
+
+        menuDOM.addElement(element);
+
+        element.setSlot(freeSlot);
+
+        styleSheet.setStyle(element.getId(), style);
     }
 }

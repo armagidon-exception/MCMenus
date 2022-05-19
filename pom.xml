@@ -11,13 +11,12 @@
 
     <modules>
         <module>MCMenus-API</module>
-        <module>MCMenus-Builder</module>
         <module>MCMenus-TestPlugin</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -48,21 +47,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.9.1</version>
-                <configuration>
-                    <inputEncoding>UTF-8</inputEncoding>
-                    <outputEncoding>UTF-8</outputEncoding>
-                    <generateReports>false</generateReports>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.0.0</version>
-            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -83,7 +67,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -1,5 +1,5 @@
 name: MCMenus-API
 version: ${project.version}
-main: ru.armagidon.mcmenusapi.MCMenusAPI
+main: ru.armagidon.mcmenusapi.MCMenusAPILoader
 api-version: 1.16
 softdepend: [PlaceholderAPI]

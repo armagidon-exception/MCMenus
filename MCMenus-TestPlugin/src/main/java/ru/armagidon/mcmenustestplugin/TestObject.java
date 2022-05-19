@@ -1,28 +1,23 @@
 package ru.armagidon.mcmenustestplugin;
 
-import ru.armagidon.mcmenusapi.menu.MenuDisplay;
-import ru.armagidon.mcmenusapi.menu.MenuPanel;
-import ru.armagidon.mcmenusapi.utils.parser.o2m.tags.*;
+import org.bukkit.entity.Player;
+import ru.armagidon.mcmenusapi.parsers.tags.*;
+import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
 
-@PanelTag(id = "test_panel", title = "&3Menu of player %player_name%")
+@LookAndFeel(lookType = MenuLookType.NORMAL, size = 6)
+@TitlePath(title = "&3Menu of player %player_name%")
 public class TestObject
 {
 
-    @IconTag(id ="test_icon", texture = "icon")
-    private final String name = "%player_name%";
+    @LinkTag
+    private final TestObject2 anotherObject;
 
-    @LinkTag(id = "test_link", texture = "link")
-    private final MenuPanel panel;
-
-    @CheckBoxTag(id = "test_checkbox", texture = "checkbox")
-    private boolean state;
-
-    public TestObject(MenuPanel panel) {
-        this.panel = panel;
+    public TestObject(TestObject2 anotherObject) {
+        this.anotherObject = anotherObject;
     }
 
-    @ButtonTag(id = "test_button", texture = "barrel")
-    public void testMethod(MenuDisplay event) {
-        event.getViewer().sendMessage("Hello there!");
+    @ButtonTag
+    public void testMethod(Player clicker) {
+        clicker.sendMessage("Hello there!");
     }
 }

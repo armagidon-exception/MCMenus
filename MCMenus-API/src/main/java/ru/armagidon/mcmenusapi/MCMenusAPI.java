@@ -1,29 +1,28 @@
 package ru.armagidon.mcmenusapi;
 
-import lombok.Getter;
-import org.bukkit.NamespacedKey;
-import org.bukkit.plugin.java.JavaPlugin;
-import ru.armagidon.mcmenusapi.menu.MenuHandler;
+import lombok.experimental.FieldDefaults;
+import org.bukkit.inventory.ItemStack;
+import ru.armagidon.mcmenusapi.data.Registry;
 
-public final class MCMenusAPI extends JavaPlugin {
+public class MCMenusAPI
+{
 
-
-    public static NamespacedKey ID_KEY;
-    @Getter
-    public static MCMenusAPI instance;
-
-    @Getter private static boolean isPAPILoaded = false;
-
-    @Override
-    public void onEnable() {
-        instance = this;
-        ID_KEY = new NamespacedKey(this, "element_id");
-        getServer().getPluginManager().registerEvents(new MenuHandler(), this);
-        isPAPILoaded = getServer().getPluginManager().getPlugin("PlaceHolderAPI") != null;
+    public static Registry<ItemStack> getItemTextureRegistry() {
+        return RegistryHolder.ITEM_TEXTURE_REGISTRY;
     }
 
-    @Override
-    public void onDisable() {
+    public static Registry<String> getItemLoreRegistry() {
+        return RegistryHolder.ITEM_LORE_REGISTRY;
+    }
 
+    public static Registry<String> getTitleRegistry() {
+        return RegistryHolder.TITLE_REGISTRY;
+    }
+
+    @FieldDefaults(makeFinal = true)
+    private static final class RegistryHolder {
+        static Registry<String> TITLE_REGISTRY = new Registry<>();
+        static Registry<String> ITEM_LORE_REGISTRY = new Registry<>();
+        static Registry<ItemStack> ITEM_TEXTURE_REGISTRY = new Registry<>();
     }
 }
