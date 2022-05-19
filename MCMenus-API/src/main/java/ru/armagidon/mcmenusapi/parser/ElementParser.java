@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface ElementParser<I extends AccessibleObject>
 {
-    MenuElement parse(I input);
+    MenuElement parse(ElementParsingContext<I> input);
 
     default ElementStyle parseStyle(I input) {
         ElementStyle style = new ElementStyle();
