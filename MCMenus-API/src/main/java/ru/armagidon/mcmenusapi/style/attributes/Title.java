@@ -23,4 +23,14 @@ public class Title implements Attribute<String>
     public synchronized void set(String title) {
         this.title = title;
     }
+
+    @Override
+    public String getDefault() {
+        return "";
+    }
+
+    @Override
+    public void setDefault(String newDefault) {
+
+    }
 }

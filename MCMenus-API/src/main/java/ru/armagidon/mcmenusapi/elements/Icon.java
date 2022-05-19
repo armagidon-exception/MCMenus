@@ -1,17 +1,14 @@
 package ru.armagidon.mcmenusapi.elements;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class Icon extends MenuElement
 {
 
-    public Icon(String id, ItemStack item) {
-        super(id, item);
+    public Icon(String id) {
+        super(id);
     }
 
     @Override
-    public void handleClickEvent(Object context, Player clicker) {
-
-    }
+    public void handleClickEvent(Object context, Player clicker) {}
 }

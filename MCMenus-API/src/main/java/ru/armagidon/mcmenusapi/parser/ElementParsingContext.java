@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.parsers;
+package ru.armagidon.mcmenusapi.parser;
 
 
 import ru.armagidon.mcmenusapi.menu.Menu;

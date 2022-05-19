@@ -18,12 +18,10 @@ public final class MCMenusTestPlugin extends JavaPlugin {
         getCommand("testmenu").setExecutor(this);
         getCommand("testmenu").setTabCompleter((sender, command, alias, args) -> Collections.emptyList());
 
-        MCMenusAPI.getItemTextureRegistry().register("barrel", new ItemStack(Material.BARREL));
+        MCMenusAPI.getItemTextureRegistry().register("arrow", new ItemStack(Material.ARROW));
         MCMenusAPI.getItemTextureRegistry().register("barrier", new ItemStack(Material.BARRIER));
-        MCMenusAPI.getItemTextureRegistry().register("link", new ItemStack(Material.ARROW));
-        MCMenusAPI.getItemTextureRegistry().register("checkbox-off", new ItemStack(Material.RED_CONCRETE));
-        MCMenusAPI.getItemTextureRegistry().register("checkbox-on", new ItemStack(Material.LIME_CONCRETE));
-        MCMenusAPI.getItemTextureRegistry().register("icon", new ItemStack(Material.MAP));
+        MCMenusAPI.getItemTextureRegistry().register("checkbox", new ItemStack(Material.RED_CONCRETE));
+        MCMenusAPI.getItemTextureRegistry().register("checked_texture", new ItemStack(Material.LIME_CONCRETE));
 
     }
 

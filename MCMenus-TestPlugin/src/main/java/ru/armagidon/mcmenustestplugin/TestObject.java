@@ -1,15 +1,16 @@
 package ru.armagidon.mcmenustestplugin;
 
 import org.bukkit.entity.Player;
-import ru.armagidon.mcmenusapi.parsers.tags.*;
+import ru.armagidon.mcmenusapi.parser.tags.*;
 import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
 
 @LookAndFeel(lookType = MenuLookType.NORMAL, size = 6)
-@TitlePath(title = "&3Menu of player %player_name%")
+@TitlePath(title = "&3Menu of player %player_name%", isPath = false)
 public class TestObject
 {
 
     @LinkTag
+    @ItemTexturePath(path = "arrow")
     private final TestObject2 anotherObject;
 
     public TestObject(TestObject2 anotherObject) {
@@ -17,6 +18,8 @@ public class TestObject
     }
 
     @ButtonTag
+    @TitlePath(title = "&aHello there button", isPath = false)
+    @ItemTexturePath(path = "barrier")
     public void testMethod(Player clicker) {
         clicker.sendMessage("Hello there!");
     }

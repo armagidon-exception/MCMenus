@@ -3,6 +3,7 @@ package ru.armagidon.mcmenusapi.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -63,6 +64,9 @@ public class SchemaMenuController implements Listener
     public void onClose(InventoryCloseEvent event) {
         if (event.getInventory().getHolder() instanceof MenuPanel menuPanel) {
             menuPanel.close();
+            if (menu.panels().stream().noneMatch(MenuPanel::isShown)) {
+                HandlerList.unregisterAll(this);
+            }
         }
     }
 }

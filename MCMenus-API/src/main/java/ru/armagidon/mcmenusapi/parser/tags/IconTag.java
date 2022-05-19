@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.parsers.tags;
+package ru.armagidon.mcmenusapi.parser.tags;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

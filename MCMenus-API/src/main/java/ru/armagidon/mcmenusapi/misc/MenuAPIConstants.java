@@ -21,7 +21,7 @@ public class MenuAPIConstants
     }
 
     private static class MenuAPIConstantsHolder {
-        private static final NamespacedKey UI_ELEMENT_INVENTORY_KEY = new NamespacedKey(JavaPlugin.getPlugin(MCMenusAPILoader.class), "element_tag");
+        private static final NamespacedKey UI_ELEMENT_INVENTORY_KEY = new NamespacedKey("mcmenusapi", "element_tag");
         private static final BiFunction<PlaceholderProcessingContext, String, String> emptyPlaceholderProcessor = (c, s) -> s;
     }
 }

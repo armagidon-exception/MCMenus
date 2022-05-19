@@ -1,24 +1,21 @@
 package ru.armagidon.mcmenusapi.elements;
 
-import lombok.SneakyThrows;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Method;
+import java.util.function.Consumer;
 
 public class Button extends MenuElement
 {
-    private final Method action;
 
-    public Button(String id, Method action) {
+    private final Consumer<Button> action;
+
+    public Button(String id, Consumer<Button> action) {
         super(id);
         this.action = action;
-        if (this.action.getParameterCount() != 1 &&  this.action.getParameterTypes()[0].equals(Player.class))
-            throw new IllegalArgumentException("");
     }
 
     @Override
-    @SneakyThrows
     public void handleClickEvent(Object context, Player clicker) {
-        action.invoke(context, clicker);
+        action.accept(this);
     }
 }

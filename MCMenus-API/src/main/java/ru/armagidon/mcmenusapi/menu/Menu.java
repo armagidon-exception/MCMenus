@@ -1,14 +1,13 @@
 package ru.armagidon.mcmenusapi.menu;
 
+import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ru.armagidon.mcmenusapi.parsers.MenuParser;
-import ru.armagidon.mcmenusapi.parsers.tags.LookAndFeel;
-import ru.armagidon.mcmenusapi.parsers.tags.TitlePath;
-import ru.armagidon.mcmenusapi.style.attributes.Title;
+import ru.armagidon.mcmenusapi.parser.parsers.MenuParser;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +20,7 @@ public class Menu
 {
     Map<String, MenuPanel> panels = new ConcurrentHashMap<>();
     Map<MenuPanel, Object> objectModels = new ConcurrentHashMap<>();
-    Player viewer;
+    @Getter Player viewer;
 
     private Menu(Player viewer) {
         this.viewer = viewer;
@@ -56,8 +55,9 @@ public class Menu
     public static Menu convertAndOpenMenu(Plugin plugin, Player viewer, Object dataModel) {
         Menu menu = new Menu(viewer);
         Bukkit.getServer().getPluginManager().registerEvents(new SchemaMenuController(menu), plugin);
-        MenuParser.convert(menu, dataModel.getClass().getName(), dataModel).show();
+        MenuParser.convert(menu, viewer.getName(), dataModel).show();
         return menu;
     }
+
 
 }

@@ -1,14 +1,13 @@
-package ru.armagidon.mcmenusapi.parser;
+package ru.armagidon.mcmenusapi.parser.parsers;
 
 import org.bukkit.entity.Player;
 import ru.armagidon.mcmenusapi.MCMenusAPI;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
 import ru.armagidon.mcmenusapi.menu.Menu;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
-import ru.armagidon.mcmenusapi.parser.tags.ButtonTag;
-import ru.armagidon.mcmenusapi.parser.tags.LinkTag;
-import ru.armagidon.mcmenusapi.parser.tags.LookAndFeel;
-import ru.armagidon.mcmenusapi.parser.tags.TitlePath;
+import ru.armagidon.mcmenusapi.parser.ElementParser;
+import ru.armagidon.mcmenusapi.parser.ElementParsingContext;
+import ru.armagidon.mcmenusapi.parser.tags.*;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
 
 import java.lang.annotation.Annotation;
@@ -28,6 +27,7 @@ public class MenuParser
     static {
         parsers.put(LinkTag.class, new LinkParser());
         parsers.put(ButtonTag.class, new ButtonParser());
+        parsers.put(CheckBoxTag.class, new CheckBoxParser());
     }
 
     public static MenuPanel convert(Menu owner, String id, Object dataModel) {
@@ -50,7 +50,7 @@ public class MenuParser
         //Parse tags
         //Methods
         var methods = dataModel.getClass().getDeclaredMethods();
-        parsers.entrySet().stream().filter(e -> e.getValue().supportedType().equals(ElementType.METHOD))
+        parsers.entrySet().stream().filter(e -> e.getValue().mayBeAttachedTo().equals(ElementType.METHOD))
                 .forEach(entry -> Arrays.stream(methods)
                         .filter(m -> m.getParameterCount() == 1)
                         .filter(m -> m.getParameterTypes()[0].equals(Player.class))
@@ -59,17 +59,19 @@ public class MenuParser
 
         //Filter field based elements with primitive types(complex types will be used to create links)
         var fields = dataModel.getClass().getDeclaredFields();
-        parsers.entrySet().stream().filter(e -> e.getValue().supportedType().equals(ElementType.FIELD))
+        parsers.entrySet().stream().filter(e -> e.getValue().mayBeAttachedTo().equals(ElementType.FIELD))
                 .filter(e -> !e.getKey().equals(LinkTag.class))
                 .forEach(entry -> Arrays.stream(fields)
                         .filter(f -> f.getType().isPrimitive() || f.getType().equals(String.class))
                         .filter(f -> f.isAnnotationPresent(entry.getKey()))
-                        .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner), defaultPanel, (ElementParser<? super Field>) entry.getValue())));
+                        .filter(f -> entry.getValue().supportedTypes().length == 0 || Arrays.stream(entry.getValue().supportedTypes()).anyMatch(type -> f.getType().equals(type)))
+                        .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner, defaultPanel.getId()), defaultPanel, (ElementParser<? super Field>) entry.getValue())));
 
         ElementParser<Field> linkParser = (ElementParser<Field>) parsers.get(LinkTag.class);
         Arrays.stream(fields)
-                .filter(f -> !f.getType().isPrimitive())
+                .filter(f -> !f.getType().isPrimitive() && !f.getType().equals(String.class))
                 .filter(f -> f.isAnnotationPresent(LinkTag.class))
+                .filter(f -> linkParser.supportedTypes().length == 0 || Arrays.stream(linkParser.supportedTypes()).anyMatch(type -> f.getType().equals(type)))
                 .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner),
                         defaultPanel, linkParser));
 

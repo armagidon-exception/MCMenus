@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.parsers.tags;
+package ru.armagidon.mcmenusapi.parser.tags;
 
 import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
 

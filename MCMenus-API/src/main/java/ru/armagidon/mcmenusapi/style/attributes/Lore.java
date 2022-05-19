@@ -32,4 +32,14 @@ public class Lore implements Attribute<List<String>>
     public synchronized void set(List<String> newLore) {
         this.lore = newLore;
     }
+
+    @Override
+    public List<String> getDefault() {
+        return List.of();
+    }
+
+    @Override
+    public void setDefault(List<String> newDefault) {
+
+    }
 }
