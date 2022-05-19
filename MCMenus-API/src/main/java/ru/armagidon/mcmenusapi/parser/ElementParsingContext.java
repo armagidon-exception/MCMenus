@@ -1,16 +1,18 @@
 package ru.armagidon.mcmenusapi.parser;
 
 
+import org.bukkit.entity.Player;
 import ru.armagidon.mcmenusapi.menu.Menu;
+import ru.armagidon.mcmenusapi.menu.MenuPanel;
 
 public interface ElementParsingContext<I>
 {
     I getInput();
     Object getDataModel();
     Menu getOwner();
-    Object[] getAdditionalData();
+    MenuPanel getParent();
 
-    static <T> ElementParsingContext<T> createContext(T input, Object dataModel, Menu owner, Object... additionalData) {
+    static <T> ElementParsingContext<T> createContext(T input, Object dataModel, Menu owner, MenuPanel parent) {
         return new ElementParsingContext<>() {
             @Override
             public T getInput() {
@@ -28,8 +30,8 @@ public interface ElementParsingContext<I>
             }
 
             @Override
-            public Object[] getAdditionalData() {
-                return additionalData;
+            public MenuPanel getParent() {
+                return parent;
             }
         };
     }

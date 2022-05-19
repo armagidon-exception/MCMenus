@@ -55,7 +55,7 @@ public class MenuParser
                         .filter(m -> m.getParameterCount() == 1)
                         .filter(m -> m.getParameterTypes()[0].equals(Player.class))
                         .filter(m -> m.isAnnotationPresent(entry.getKey()))
-                        .forEach(m -> parseAndAddElement(ElementParsingContext.createContext(m, dataModel, owner, owner.getViewer()), defaultPanel, (ElementParser<? super Method>) entry.getValue())));
+                        .forEach(m -> parseAndAddElement(ElementParsingContext.createContext(m, dataModel, owner, defaultPanel), (ElementParser<? super Method>) entry.getValue())));
 
         //Filter field based elements with primitive types(complex types will be used to create links)
         var fields = dataModel.getClass().getDeclaredFields();
@@ -65,23 +65,22 @@ public class MenuParser
                         .filter(f -> f.getType().isPrimitive() || f.getType().equals(String.class))
                         .filter(f -> f.isAnnotationPresent(entry.getKey()))
                         .filter(f -> entry.getValue().supportedTypes().length == 0 || Arrays.stream(entry.getValue().supportedTypes()).anyMatch(type -> f.getType().equals(type)))
-                        .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner, defaultPanel.getId()), defaultPanel, (ElementParser<? super Field>) entry.getValue())));
+                        .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner, defaultPanel), (ElementParser<? super Field>) entry.getValue())));
 
         ElementParser<Field> linkParser = (ElementParser<Field>) parsers.get(LinkTag.class);
         Arrays.stream(fields)
                 .filter(f -> !f.getType().isPrimitive() && !f.getType().equals(String.class))
                 .filter(f -> f.isAnnotationPresent(LinkTag.class))
                 .filter(f -> linkParser.supportedTypes().length == 0 || Arrays.stream(linkParser.supportedTypes()).anyMatch(type -> f.getType().equals(type)))
-                .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner),
-                        defaultPanel, linkParser));
+                .forEach(f -> parseAndAddElement(ElementParsingContext.createContext(f, dataModel, owner, defaultPanel), linkParser));
 
         owner.setModelFor(defaultPanel, dataModel);
         return defaultPanel;
     }
 
-    private static <I extends AccessibleObject> void parseAndAddElement(ElementParsingContext<I> input, MenuPanel defaultPanel, ElementParser<I> parser) {
+    private static <I extends AccessibleObject> void parseAndAddElement(ElementParsingContext<I> input, ElementParser<I> parser) {
         MenuElement element = parser.parse(input);
-        ElementStyle style = parser.parseStyle(input.getInput());
-        defaultPanel.addElement(element, style);
+        ElementStyle style = parser.parseStyle(input);
+        input.getParent().addElement(element, style);
     }
 }

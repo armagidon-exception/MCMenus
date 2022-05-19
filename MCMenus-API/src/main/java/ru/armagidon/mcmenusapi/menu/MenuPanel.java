@@ -109,10 +109,12 @@ public class MenuPanel implements InventoryHolder
 
         ItemMeta meta = item.getItemMeta();
         meta.getPersistentDataContainer().set(MenuAPIConstants.uiElementInventoryTag(), PersistentDataType.STRING, element.getId());
-        String title = color(elementStyle.getAttribute(Title.class).get());
+        String title = color(elementStyle.preprocess(elementStyle.getAttribute(Title.class).get()));
 
         List<String> lore = new ArrayList<>(elementStyle.getAttribute(Lore.class)
-                .get().stream().map(MenuPanel::color)
+                .get().stream()
+                .map(elementStyle::preprocess)
+                .map(MenuPanel::color)
                 .toList());
 
         if (lore.isEmpty() && meta.getLore() != null) lore.addAll(meta.getLore());

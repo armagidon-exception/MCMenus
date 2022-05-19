@@ -10,6 +10,7 @@ public class TestObject
 {
 
     @LinkTag
+    @TitlePath(title = "Hello, %player_name%", isPath = false)
     @ItemTexturePath(path = "arrow")
     private final TestObject2 anotherObject;
 

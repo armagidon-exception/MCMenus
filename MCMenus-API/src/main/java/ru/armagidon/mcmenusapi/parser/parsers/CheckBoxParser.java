@@ -27,7 +27,7 @@ public class CheckBoxParser implements ElementParser<Field>
 
             CheckBoxTag checkBoxTag = input.getInput().getAnnotation(CheckBoxTag.class);
             String checkStatePath = checkBoxTag.checkStatePath();
-            MenuPanel parent = input.getOwner().getPanel((String) input.getAdditionalData()[0]);
+            MenuPanel parent = input.getParent();
             ElementStyle style = parent.getStyleSheet().getStyle(button.getId());
 
             if (currentValue) {
@@ -40,9 +40,9 @@ public class CheckBoxParser implements ElementParser<Field>
     }
 
     @Override
-    public ElementStyle parseStyle(Field input) {
+    public ElementStyle parseStyle(ElementParsingContext<Field> input) {
         ElementStyle style = ElementParser.super.parseStyle(input);
-        CheckBoxTag checkBoxTag = input.getAnnotation(CheckBoxTag.class);
+        CheckBoxTag checkBoxTag = input.getInput().getAnnotation(CheckBoxTag.class);
 
         if (checkBoxTag.checked()) {
             style.getAttribute(TextureAttribute.class).set(MCMenusAPI.getItemTextureRegistry().getByPath(checkBoxTag.checkStatePath()));

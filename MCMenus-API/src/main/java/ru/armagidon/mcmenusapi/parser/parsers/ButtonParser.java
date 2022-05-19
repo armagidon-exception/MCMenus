@@ -15,7 +15,7 @@ public class ButtonParser implements ElementParser<Method>
     @Override
     public MenuElement parse(ElementParsingContext<Method> input) {
         return new Button(input.getInput().getName(), Unchecked.consumer((b) ->
-                input.getInput().invoke(input.getDataModel(), input.getAdditionalData())));
+                input.getInput().invoke(input.getDataModel(), input.getOwner().getViewer())));
     }
 
     @Override
