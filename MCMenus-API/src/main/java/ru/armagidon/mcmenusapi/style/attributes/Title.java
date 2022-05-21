@@ -1,36 +1,27 @@
 package ru.armagidon.mcmenusapi.style.attributes;
 
 import lombok.ToString;
+import ru.armagidon.mcmenusapi.MCMenusAPI;
+import ru.armagidon.mcmenusapi.parser.tags.TitlePath;
+import ru.armagidon.mcmenusapi.style.AttributeParser;
 
 @ToString
-public class Title implements Attribute<String>
-{
-    private volatile String title;
+public class Title extends Attribute.SimpleAttribute<String> {
 
-    private Title(String title) {
-        this.title = title;
+    private static final AttributeParser<String> TITlE_PARSER = ((target, input) -> {
+        if (input.isAnnotationPresent(TitlePath.class)) {
+            TitlePath path = input.getData(TitlePath.class);
+            if (path.isPath()) target.setDefault(MCMenusAPI.getTitleRegistry().getByPath(path.title()));
+            else target.setDefault(path.title());
+
+        }
+    });
+
+    private Title(String defaultValue) {
+        super(defaultValue, TITlE_PARSER);
     }
 
     public static Title of(String input) {
         return new Title(input);
-    }
-    @Override
-    public String get() {
-        return title;
-    }
-
-    @Override
-    public synchronized void set(String title) {
-        this.title = title;
-    }
-
-    @Override
-    public String getDefault() {
-        return "";
-    }
-
-    @Override
-    public void setDefault(String newDefault) {
-
     }
 }

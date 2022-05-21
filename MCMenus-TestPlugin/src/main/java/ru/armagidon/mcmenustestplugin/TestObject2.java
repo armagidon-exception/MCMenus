@@ -1,10 +1,7 @@
 package ru.armagidon.mcmenustestplugin;
 
 
-import ru.armagidon.mcmenusapi.parser.tags.CheckBoxTag;
-import ru.armagidon.mcmenusapi.parser.tags.ItemTexturePath;
-import ru.armagidon.mcmenusapi.parser.tags.LookAndFeel;
-import ru.armagidon.mcmenusapi.parser.tags.TitlePath;
+import ru.armagidon.mcmenusapi.parser.tags.*;
 import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
 
 @TitlePath(title = "Test object 2", isPath = false)
@@ -13,6 +10,14 @@ public class TestObject2
 {
     @TitlePath(title = "Test checkbox", isPath = false)
     @ItemTexturePath(path = "checkbox")
-    @CheckBoxTag(checked = false, checkStatePath = "checked_texture")
+    @LorePath(lore = {"checked: %checkbox_state%"}, isPath = false)
+    @CheckBoxTag(checkStateTexturePath = "checked_texture")
     private boolean testCheckButton = false;
+
+    @DataModifier
+    public void setTestCheckButton(boolean testCheckButton) {
+        this.testCheckButton = testCheckButton;
+    }
+
+
 }

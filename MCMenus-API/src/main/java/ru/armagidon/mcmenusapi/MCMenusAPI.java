@@ -23,10 +23,16 @@ public class MCMenusAPI
         return RegistryHolder.TITLE_REGISTRY;
     }
 
+    public static Registry<String> getPlaceholderRegistry() {
+        return RegistryHolder.PLACEHOLDER_REGISTRY;
+    }
+
+
     @FieldDefaults(makeFinal = true)
     private static final class RegistryHolder {
         static Registry<String> TITLE_REGISTRY = new Registry<>(String::new);
         static Registry<List<String>> ITEM_LORE_REGISTRY = new Registry<>(ArrayList::new);
         static Registry<ItemStack> ITEM_TEXTURE_REGISTRY = new Registry<>(() -> new ItemStack(Material.STONE));
+        static Registry<String> PLACEHOLDER_REGISTRY = new Registry<>(String::new);
     }
 }

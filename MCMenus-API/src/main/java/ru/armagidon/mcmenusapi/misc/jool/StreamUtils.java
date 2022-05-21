@@ -9,12 +9,16 @@ import java.util.function.Predicate;
 
 public class StreamUtils {
 
-    public static <T> Consumer<T> withCounter(BiConsumer<Integer, T> consumer) {
+    public static <T> Predicate<T> inversePredicate(Predicate<T> predicate) {
+        return (t) -> !predicate.test(t);
+    }
+
+    public static <T> Consumer<T> consumerWithCounter(BiConsumer<Integer, T> consumer) {
         AtomicInteger counter = new AtomicInteger(0);
         return item -> consumer.accept(counter.getAndIncrement(), item);
     }
 
-    public static <T> Predicate<T> withCounter(BiPredicate<Integer, T> predicate) {
+    public static <T> Predicate<T> predicateWithCounter(BiPredicate<Integer, T> predicate) {
         AtomicInteger counter = new AtomicInteger(0);
         return item -> predicate.test(counter.getAndIncrement(), item);
     }

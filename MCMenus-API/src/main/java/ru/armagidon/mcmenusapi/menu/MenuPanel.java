@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,9 +21,10 @@ import ru.armagidon.mcmenusapi.elements.MenuDOM;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
 import ru.armagidon.mcmenusapi.misc.MenuAPIConstants;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
+import ru.armagidon.mcmenusapi.style.FrameStyle;
 import ru.armagidon.mcmenusapi.style.MenuStyleSheet;
-import ru.armagidon.mcmenusapi.style.PlaceholderProcessingContext;
 import ru.armagidon.mcmenusapi.style.attributes.Lore;
+import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
 import ru.armagidon.mcmenusapi.style.attributes.TextureAttribute;
 import ru.armagidon.mcmenusapi.style.attributes.Title;
 
@@ -39,7 +41,7 @@ public class MenuPanel implements InventoryHolder
     MenuDOM menuDOM;
     MenuStyleSheet styleSheet;
     @Getter String id;
-    Player viewer;
+    @Getter Player viewer;
     @NonFinal volatile Inventory display;
     @NonFinal volatile boolean shown;
 
@@ -78,15 +80,22 @@ public class MenuPanel implements InventoryHolder
     }
 
     private int getFreeSlot() {
+        final FrameStyle frameStyle = styleSheet.getFrameStyle();
+        final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
+        final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
+        final int columns = lookAndFeel.getElementsMinimum();
+        int menuSize = getMenuSize();
+        if (!lookAndFeel.equals(MenuLookType.NORMAL))
+            menuSize = columns;
         return IntStream.
-                rangeClosed(1, getStyleSheet().getHeadStyle().getMenuSize() * getStyleSheet().getHeadStyle().getMenuLookType().getElementsMinimum())
+                rangeClosed(1, menuSize)
                 .filter(i -> menuDOM.entrySet().stream().map(Map.Entry::getValue).map(MenuElement::getSlot).noneMatch(s -> s == i))
                 .findFirst().getAsInt();
     }
 
     //Refreshing
     private synchronized void setCanvas(String title, int size, InventoryType type) {
-        title = styleSheet.getHeadStyle().getPlaceHolderProcessor().apply(new PlaceholderProcessingContext(viewer), color(title));
+        title = getStyleSheet().getFrameStyle().preprocess(color(title));
         if (type.equals(InventoryType.CHEST))
             display = Bukkit.createInventory(this, size, title);
         else
@@ -131,14 +140,30 @@ public class MenuPanel implements InventoryHolder
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
+    private int  getMenuSize() {
+        final FrameStyle frameStyle = styleSheet.getFrameStyle();
+        final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
+        final int rows = lookAndFeelProperties.getMenuSize();
+        final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
+        final int columns = lookAndFeel.getElementsMinimum();
+        return rows * columns;
+    }
+
     public void refresh(boolean rerender) {
         if (!shown) return;
-        final int menuSize = styleSheet.getHeadStyle().getMenuSize() * styleSheet.getHeadStyle().getMenuLookType().getElementsMinimum();
+        final FrameStyle frameStyle = styleSheet.getFrameStyle();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            frameStyle.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
+            menuDOM.entrySet().stream().map(Map.Entry::getKey).map(styleSheet::getStyle).forEach(style -> {
+                style.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
+            });
+        }
         if (rerender) {
             //Phase #1 Setting menu's properties
-            String menuTitle = styleSheet.getHeadStyle().getMenuTitle().get();
-            InventoryType inventoryType = styleSheet.getHeadStyle().getMenuLookType().getInventoryType();
-            setCanvas(menuTitle, menuSize, inventoryType);
+            final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
+            String menuTitle = frameStyle.getAttribute(Title.class).get();
+            InventoryType inventoryType = lookAndFeelProperties.getLookType().getInventoryType();
+            setCanvas(menuTitle, getMenuSize(), inventoryType);
         }
         //Phase #3 Render elements
         menuDOM.entrySet().forEach(entry -> {

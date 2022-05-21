@@ -7,9 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface CheckBoxTag
+public @interface RefreshFunction
 {
-    String checkStateTexturePath() default "";
-    String checkStatePlaceholder() default "";
-    String uncheckStatePlaceholder() default "";
+
 }

@@ -2,17 +2,24 @@ package ru.armagidon.mcmenusapi.style.attributes;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import ru.armagidon.mcmenusapi.MCMenusAPI;
+import ru.armagidon.mcmenusapi.parser.tags.ItemTexturePath;
+import ru.armagidon.mcmenusapi.style.AttributeParser;
+
+import java.lang.reflect.AccessibleObject;
 
 
-public class TextureAttribute implements Attribute<ItemStack>
-{
+public class TextureAttribute extends Attribute.SimpleAttribute<ItemStack> {
 
-    private volatile ItemStack texture;
-    private ItemStack defaultValue;
+    private static final AttributeParser<ItemStack> PARSER = (target, input) -> {
+        if (input.isAnnotationPresent(ItemTexturePath.class)) {
+            ItemTexturePath texturePath = input.getData(ItemTexturePath.class);
+            target.setDefault(MCMenusAPI.getItemTextureRegistry().getByPath(texturePath.path()));
+        }
+    };
 
-    public TextureAttribute(ItemStack texture) {
-        this.texture = texture;
-        this.defaultValue = texture.clone();
+    private TextureAttribute(ItemStack defaultValue) {
+        super(defaultValue.clone(), PARSER);
     }
 
     public static TextureAttribute of(ItemStack texture) {
@@ -21,25 +28,5 @@ public class TextureAttribute implements Attribute<ItemStack>
 
     public static TextureAttribute of(Material texture) {
         return of(new ItemStack(texture));
-    }
-
-    @Override
-    public ItemStack get() {
-        return texture;
-    }
-
-    @Override
-    public synchronized void set(ItemStack newValue) {
-        this.texture = newValue;
-    }
-
-    @Override
-    public ItemStack getDefault() {
-        return defaultValue;
-    }
-
-    @Override
-    public void setDefault(ItemStack newDefault) {
-        this.defaultValue = newDefault;
     }
 }

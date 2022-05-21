@@ -1,6 +1,5 @@
 package ru.armagidon.mcmenusapi.menu;
 
-import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -52,11 +51,13 @@ public class Menu
         return panels.values().stream().collect(Collectors.toUnmodifiableSet());
     }
 
-    public static Menu convertAndOpenMenu(Plugin plugin, Player viewer, Object dataModel) {
+    @SuppressWarnings("unchecked")
+    public static <T> T convertAndOpenMenu(Plugin plugin, Player viewer, T dataModel) {
         Menu menu = new Menu(viewer);
         Bukkit.getServer().getPluginManager().registerEvents(new SchemaMenuController(menu), plugin);
-        MenuParser.convert(menu, viewer.getName(), dataModel).show();
-        return menu;
+        MenuParser.ParseResult result = MenuParser.convert(menu, viewer.getName(), dataModel);
+        result.result().show();
+        return (T) result.proxiedDataModel();
     }
 
 

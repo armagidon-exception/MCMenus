@@ -5,11 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface CheckBoxTag
+public @interface DataModifier
 {
-    String checkStateTexturePath() default "";
-    String checkStatePlaceholder() default "";
-    String uncheckStatePlaceholder() default "";
+
 }

@@ -1,52 +1,53 @@
 package ru.armagidon.mcmenusapi.parser.parsers;
 
 import ru.armagidon.mcmenusapi.MCMenusAPI;
+import ru.armagidon.mcmenusapi.data.ElementParsingContext;
+import ru.armagidon.mcmenusapi.data.StyleParsingContext;
 import ru.armagidon.mcmenusapi.elements.Button;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.misc.jool.Unchecked;
 import ru.armagidon.mcmenusapi.parser.ElementParser;
-import ru.armagidon.mcmenusapi.parser.ElementParsingContext;
 import ru.armagidon.mcmenusapi.parser.tags.CheckBoxTag;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
 import ru.armagidon.mcmenusapi.style.attributes.TextureAttribute;
 
 import java.lang.annotation.ElementType;
-import java.lang.reflect.Field;
+import java.util.UUID;
 
-public class CheckBoxParser implements ElementParser<Field>
-{
+public class CheckBoxParser implements ElementParser<CheckBoxTag, Boolean> {
 
     @Override
-    public MenuElement parse(ElementParsingContext<Field> input) {
-        return new Button(input.getInput().getName(), Unchecked.consumer((button) ->
+    public MenuElement parse(ElementParsingContext<CheckBoxTag, Boolean> input) {
+        Button button =  new Button(UUID.randomUUID().toString(), Unchecked.consumer((btn) ->
         {
-            input.getInput().setAccessible(true);
-            boolean currentValue = input.getInput().getBoolean(input.getDataModel());
-            input.getInput().setBoolean(input.getDataModel(), !currentValue);
-
-            CheckBoxTag checkBoxTag = input.getInput().getAnnotation(CheckBoxTag.class);
-            String checkStatePath = checkBoxTag.checkStatePath();
-            MenuPanel parent = input.getParent();
-            ElementStyle style = parent.getStyleSheet().getStyle(button.getId());
-
-            if (currentValue) {
-                style.getAttribute(TextureAttribute.class).reset();
-            } else {
-                style.getAttribute(TextureAttribute.class).set(MCMenusAPI.getItemTextureRegistry().getByPath(checkStatePath));
-            }
+            boolean currentValue = input.getDataGetter().get();
+            input.getDataSetter().accept(!currentValue);
 
         }));
+
+        return button;
     }
 
     @Override
-    public ElementStyle parseStyle(ElementParsingContext<Field> input) {
+    public ElementStyle parseStyle(StyleParsingContext<Boolean> input) {
         ElementStyle style = ElementParser.super.parseStyle(input);
-        CheckBoxTag checkBoxTag = input.getInput().getAnnotation(CheckBoxTag.class);
 
-        if (checkBoxTag.checked()) {
-            style.getAttribute(TextureAttribute.class).set(MCMenusAPI.getItemTextureRegistry().getByPath(checkBoxTag.checkStatePath()));
-        }
+        CheckBoxTag checkBoxTag = input.getData(CheckBoxTag.class);
+        String checkStatePath = checkBoxTag.checkStateTexturePath();
+
+        style.getAttribute(TextureAttribute.class).setUpdateFunction(attribute -> {
+            if (input.getDataGetter().get()) {
+                style.getAttribute(TextureAttribute.class).set(MCMenusAPI.getItemTextureRegistry().getByPath(checkStatePath));
+            } else {
+                style.getAttribute(TextureAttribute.class).reset();
+            }
+        });
+
+        style.addPreprocessorUnit((i) -> {
+            boolean state = input.getDataGetter().get();
+            return i.replace("%checkbox_state%", Boolean.toString(state));
+        });
         return style;
     }
 
@@ -55,8 +56,10 @@ public class CheckBoxParser implements ElementParser<Field>
         return ElementType.FIELD;
     }
 
+
     @Override
-    public Class<?>[] supportedTypes() {
+    @SuppressWarnings("unchecked")
+    public Class<? extends Boolean>[] supportedTypes() {
         return new Class[] {Boolean.class, boolean.class};
     }
 }

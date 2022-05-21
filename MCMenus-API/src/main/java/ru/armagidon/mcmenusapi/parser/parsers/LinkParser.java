@@ -1,22 +1,19 @@
 package ru.armagidon.mcmenusapi.parser.parsers;
 
-import lombok.SneakyThrows;
+import ru.armagidon.mcmenusapi.data.ElementParsingContext;
 import ru.armagidon.mcmenusapi.elements.Link;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
 import ru.armagidon.mcmenusapi.parser.ElementParser;
-import ru.armagidon.mcmenusapi.parser.ElementParsingContext;
+import ru.armagidon.mcmenusapi.parser.tags.LinkTag;
 
 import java.lang.annotation.ElementType;
-import java.lang.reflect.Field;
+import java.util.UUID;
 
-public class LinkParser implements ElementParser<Field>
-{
+public class LinkParser implements ElementParser<LinkTag, Object> {
 
     @Override
-    @SneakyThrows
-    public MenuElement parse(ElementParsingContext<Field> input) {
-        input.getInput().setAccessible(true);
-        return new Link(input.getInput().getName(), MenuParser.convert(input.getOwner(), input.getInput().getName(), input.getInput().get(input.getDataModel())));
+    public MenuElement parse(ElementParsingContext<LinkTag, Object> input) {
+        return new Link(UUID.randomUUID().toString(), MenuParser.convert(input.getOwner(), UUID.randomUUID().toString(), input.getDataGetter().get()).result());
     }
 
     @Override
