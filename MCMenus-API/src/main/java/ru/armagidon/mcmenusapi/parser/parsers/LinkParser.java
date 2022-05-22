@@ -17,6 +17,11 @@ public class LinkParser implements ElementParser<LinkTag, Object> {
     }
 
     @Override
+    public Class<LinkTag> getAnnotationClass() {
+        return LinkTag.class;
+    }
+
+    @Override
     public ElementType mayBeAttachedTo() {
         return ElementType.FIELD;
     }

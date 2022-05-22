@@ -14,10 +14,11 @@ public class TestObject2
     @CheckBoxTag(checkStateTexturePath = "checked_texture")
     private boolean testCheckButton = false;
 
-    @DataModifier
-    public void setTestCheckButton(boolean testCheckButton) {
-        this.testCheckButton = testCheckButton;
-    }
 
+    @TitlePath(title = "Test checkbox", isPath = false)
+    @ItemTexturePath(path = "checkbox")
+    @LorePath(lore = {"checked: %checkbox_state%"}, isPath = false)
+    @CheckBoxTag(checkStateTexturePath = "checked_texture")
+    public Boolean[] generateCheckboxes = new Boolean[] {false, false, false};
 
 }

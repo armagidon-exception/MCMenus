@@ -1,6 +1,5 @@
 package ru.armagidon.mcmenustestplugin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,16 +30,11 @@ public final class MCMenusTestPlugin extends JavaPlugin {
 
     }
 
-    boolean state = false;
+    TestObject obj = new TestObject(new TestObject2());
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        var t2 = new TestObject2();
-        TestObj object = Menu.convertAndOpenMenu(this, (Player) sender, new TestObject(t2));
-        Bukkit.getScheduler().runTaskTimer(MCMenusTestPlugin.getProvidingPlugin(MCMenusTestPlugin.class), () -> {
-            object.setTestCheckButton(!state);
-            state = !state;
-        }, 5, 5);
+        Menu.convertAndOpenMenu(this, (Player) sender, obj);
         return true;
     }
 }

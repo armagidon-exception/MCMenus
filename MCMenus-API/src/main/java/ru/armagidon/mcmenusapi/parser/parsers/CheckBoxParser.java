@@ -5,7 +5,6 @@ import ru.armagidon.mcmenusapi.data.ElementParsingContext;
 import ru.armagidon.mcmenusapi.data.StyleParsingContext;
 import ru.armagidon.mcmenusapi.elements.Button;
 import ru.armagidon.mcmenusapi.elements.MenuElement;
-import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.misc.jool.Unchecked;
 import ru.armagidon.mcmenusapi.parser.ElementParser;
 import ru.armagidon.mcmenusapi.parser.tags.CheckBoxTag;
@@ -19,14 +18,12 @@ public class CheckBoxParser implements ElementParser<CheckBoxTag, Boolean> {
 
     @Override
     public MenuElement parse(ElementParsingContext<CheckBoxTag, Boolean> input) {
-        Button button =  new Button(UUID.randomUUID().toString(), Unchecked.consumer((btn) ->
+
+        return new Button(UUID.randomUUID().toString(), Unchecked.consumer((btn) ->
         {
             boolean currentValue = input.getDataGetter().get();
             input.getDataSetter().accept(!currentValue);
-
         }));
-
-        return button;
     }
 
     @Override
@@ -58,8 +55,7 @@ public class CheckBoxParser implements ElementParser<CheckBoxTag, Boolean> {
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Class<? extends Boolean>[] supportedTypes() {
-        return new Class[] {Boolean.class, boolean.class};
+    public Class<CheckBoxTag> getAnnotationClass() {
+        return CheckBoxTag.class;
     }
 }

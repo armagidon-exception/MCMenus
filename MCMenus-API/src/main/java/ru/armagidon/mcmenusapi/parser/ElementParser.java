@@ -23,8 +23,8 @@ public interface ElementParser<A extends Annotation, T> {
 
     ElementType mayBeAttachedTo();
 
-    @SuppressWarnings("unchecked")
-    default Class<? extends T>[] supportedTypes() {
-        return new Class[0];
-    }
+    Class<A> getAnnotationClass();
+
+
+    default void syntaxCheck(Class<T> inputType, A annotationData) throws ParsingException {}
 }

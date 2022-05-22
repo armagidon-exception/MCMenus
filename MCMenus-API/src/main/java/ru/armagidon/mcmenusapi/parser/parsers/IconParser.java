@@ -20,4 +20,9 @@ public class IconParser implements ElementParser<IconTag, Object> {
     public ElementType mayBeAttachedTo() {
         return ElementType.FIELD;
     }
+
+    @Override
+    public Class<IconTag> getAnnotationClass() {
+        return IconTag.class;
+    }
 }

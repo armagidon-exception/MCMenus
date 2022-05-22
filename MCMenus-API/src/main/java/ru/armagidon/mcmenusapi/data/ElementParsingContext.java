@@ -35,6 +35,17 @@ public interface ElementParsingContext<A extends Annotation, I>
         @Builder.Default Supplier<I> dataGetter = () -> null ;
         Menu owner;
         MenuPanel parent;
+
+        ElementParsingContextImplBuilder<A, I> modifer() {
+            var builder = new ElementParsingContextImplBuilder<A, I>();
+            builder.dataSetter(this.dataSetter);
+            builder.dataGetter(this.dataGetter);
+            builder.methodInvoker(methodInvoker);
+            builder.annotationData(annotationData);
+            builder.owner(owner);
+            builder.parent(parent);
+            return builder;
+        }
     }
 
 }

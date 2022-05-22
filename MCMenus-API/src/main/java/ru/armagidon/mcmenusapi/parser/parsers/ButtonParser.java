@@ -18,6 +18,11 @@ public class ButtonParser implements ElementParser<ButtonTag, Object> {
     }
 
     @Override
+    public Class<ButtonTag> getAnnotationClass() {
+        return ButtonTag.class;
+    }
+
+    @Override
     public ElementType mayBeAttachedTo() {
         return ElementType.METHOD;
     }

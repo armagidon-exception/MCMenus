@@ -37,7 +37,6 @@ public interface Attribute<T>
 
         @Override
         public void setUpdateFunction(Consumer<Attribute<T>> updateFunction) {
-            System.out.println("SET");
             this.updateFunction = updateFunction;
         }
 
