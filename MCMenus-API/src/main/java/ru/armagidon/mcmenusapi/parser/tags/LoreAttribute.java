@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.FIELD})
-public @interface LorePath
+public @interface LoreAttribute
 {
     String[] lore();
     boolean isPath() default true;

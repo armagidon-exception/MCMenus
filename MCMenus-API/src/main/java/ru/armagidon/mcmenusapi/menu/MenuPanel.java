@@ -9,16 +9,17 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import ru.armagidon.mcmenusapi.elements.MenuDOM;
-import ru.armagidon.mcmenusapi.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.MenuDOM;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.RenderedElement;
 import ru.armagidon.mcmenusapi.misc.MenuAPIConstants;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
 import ru.armagidon.mcmenusapi.style.FrameStyle;
@@ -42,11 +43,12 @@ public class MenuPanel implements InventoryHolder
     MenuStyleSheet styleSheet;
     @Getter String id;
     @Getter Player viewer;
-    @NonFinal volatile Inventory display;
+    @NonFinal final MenuCanvas canvas;
     @NonFinal volatile boolean shown;
 
     public MenuPanel(String id, Player viewer) {
         Validate.notEmpty(id);
+        this.canvas = new MenuCanvas(this);
         this.viewer = viewer;
         this.id = id;
         this.styleSheet = new MenuStyleSheet();
@@ -56,7 +58,7 @@ public class MenuPanel implements InventoryHolder
     public synchronized void show() {
         shown = true;
         render();
-        viewer.openInventory(display);
+        viewer.openInventory(canvas.getDisplay());
     }
 
     void close() {
@@ -68,6 +70,12 @@ public class MenuPanel implements InventoryHolder
     }
 
     public void render() {
+        if (!shown) return;
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            styleSheet.getFrameStyle().addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
+            menuDOM.entrySet().stream().map(Map.Entry::getKey).map(styleSheet::getStyle).forEach(style ->
+                    style.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input)));
+        }
         refresh(true);
     }
 
@@ -84,28 +92,24 @@ public class MenuPanel implements InventoryHolder
         final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
         final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
         final int columns = lookAndFeel.getElementsMinimum();
-        int menuSize = getMenuSize();
+        int menuSize = getMenuSize(lookAndFeelProperties);
         if (!lookAndFeel.equals(MenuLookType.NORMAL))
             menuSize = columns;
         return IntStream.
                 rangeClosed(1, menuSize)
-                .filter(i -> menuDOM.entrySet().stream().map(Map.Entry::getValue).map(MenuElement::getSlot).noneMatch(s -> s == i))
+                .filter(i -> menuDOM
+                        .entrySet()
+                        .stream()
+                        .map(Map.Entry::getValue)
+                        .map(MenuElement::getSlot)
+                        .noneMatch(s -> s == i))
                 .findFirst().getAsInt();
-    }
-
-    //Refreshing
-    private synchronized void setCanvas(String title, int size, InventoryType type) {
-        title = getStyleSheet().getFrameStyle().preprocess(color(title));
-        if (type.equals(InventoryType.CHEST))
-            display = Bukkit.createInventory(this, size, title);
-        else
-            display = Bukkit.createInventory(this, type, title);
     }
 
     @NotNull
     @Override
     public Inventory getInventory() {
-        return display;
+        return canvas.getDisplay();
     }
 
     //Setting item
@@ -114,35 +118,18 @@ public class MenuPanel implements InventoryHolder
 
         if (slot < 1) slot = 1;
 
-        ItemStack item = elementStyle.getAttribute(TextureAttribute.class).get().clone();
-
+        RenderedElement renderedElement = RenderedElement.create(Material.STONE);
+        elementStyle.applyAttributes(renderedElement);
+        ItemStack item = renderedElement.asItemStack();
         ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
         meta.getPersistentDataContainer().set(MenuAPIConstants.uiElementInventoryTag(), PersistentDataType.STRING, element.getId());
-        String title = color(elementStyle.preprocess(elementStyle.getAttribute(Title.class).get()));
-
-        List<String> lore = new ArrayList<>(elementStyle.getAttribute(Lore.class)
-                .get().stream()
-                .map(elementStyle::preprocess)
-                .map(MenuPanel::color)
-                .toList());
-
-        if (lore.isEmpty() && meta.getLore() != null) lore.addAll(meta.getLore());
-        if (title.isEmpty() || title.isBlank()) title = meta.getDisplayName();
-
-        meta.setDisplayName(title);
-        meta.setLore(lore);
         item.setItemMeta(meta);
 
-        display.setItem(slot - 1, item);
+        canvas.setItem(slot - 1, item);
     }
 
-    private static String color(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
-    }
-
-    private int  getMenuSize() {
-        final FrameStyle frameStyle = styleSheet.getFrameStyle();
-        final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
+    private int  getMenuSize(FrameStyle.LookAndFeelProperties lookAndFeelProperties) {
         final int rows = lookAndFeelProperties.getMenuSize();
         final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
         final int columns = lookAndFeel.getElementsMinimum();
@@ -152,24 +139,13 @@ public class MenuPanel implements InventoryHolder
     public void refresh(boolean rerender) {
         if (!shown) return;
         final FrameStyle frameStyle = styleSheet.getFrameStyle();
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            frameStyle.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
-            menuDOM.entrySet().stream().map(Map.Entry::getKey).map(styleSheet::getStyle).forEach(style -> {
-                style.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
-            });
-        }
         if (rerender) {
             //Phase #1 Setting menu's properties
-            final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
-            String menuTitle = frameStyle.getAttribute(Title.class).get();
-            InventoryType inventoryType = lookAndFeelProperties.getLookType().getInventoryType();
-            setCanvas(menuTitle, getMenuSize(), inventoryType);
+            styleSheet.getFrameStyle().applyAttributes(canvas);
         }
         //Phase #3 Render elements
-        menuDOM.entrySet().forEach(entry -> {
-            MenuElement element = entry.getValue();
-            renderElement(element.getSlot(), element);
-        });
+        menuDOM.entrySet().stream().map(Map.Entry::getValue).forEach(element ->
+                renderElement(element.getSlot(), element));
         if (!rerender)
             viewer.updateInventory();
     }
@@ -182,6 +158,5 @@ public class MenuPanel implements InventoryHolder
 
         styleSheet.setStyle(element.getId(), style);
     }
-
 
 }

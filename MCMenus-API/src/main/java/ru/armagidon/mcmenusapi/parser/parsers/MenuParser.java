@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import org.bukkit.entity.Player;
 import ru.armagidon.mcmenusapi.data.ElementParsingContext;
 import ru.armagidon.mcmenusapi.data.StyleParsingContext;
-import ru.armagidon.mcmenusapi.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
 import ru.armagidon.mcmenusapi.menu.Menu;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 import ru.armagidon.mcmenusapi.misc.Reflection;

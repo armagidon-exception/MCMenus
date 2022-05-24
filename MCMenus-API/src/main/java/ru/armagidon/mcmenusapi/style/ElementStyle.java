@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import ru.armagidon.mcmenusapi.style.attributes.Attribute;
-import ru.armagidon.mcmenusapi.style.attributes.Lore;
-import ru.armagidon.mcmenusapi.style.attributes.TextureAttribute;
-import ru.armagidon.mcmenusapi.style.attributes.Title;
+import ru.armagidon.mcmenusapi.style.attributes.*;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -21,7 +18,9 @@ public class ElementStyle extends Style
 {
 
     public ElementStyle() {
-        super(Title.of(""), Lore.of(), TextureAttribute.of(Material.STONE));
+        super(Title.of(""),
+                Lore.of(),
+                TextureAttribute.of(Material.STONE));
     }
 
 }

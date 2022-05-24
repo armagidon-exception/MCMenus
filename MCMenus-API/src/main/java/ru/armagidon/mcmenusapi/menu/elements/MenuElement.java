@@ -1,13 +1,14 @@
-package ru.armagidon.mcmenusapi.elements;
+package ru.armagidon.mcmenusapi.menu.elements;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
+import ru.armagidon.mcmenusapi.menu.Renderable;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public abstract class MenuElement
+public abstract class MenuElement implements Renderable
 {
 
     @Getter final String id;

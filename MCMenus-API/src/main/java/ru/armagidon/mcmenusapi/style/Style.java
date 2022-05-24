@@ -1,29 +1,35 @@
 package ru.armagidon.mcmenusapi.style;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang.ArrayUtils;
+import org.w3c.dom.Attr;
+import ru.armagidon.mcmenusapi.menu.Renderable;
 import ru.armagidon.mcmenusapi.style.attributes.Attribute;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public abstract class Style
 {
-    Map<Class<? extends Attribute<?>>, Attribute<?>> attributes;
+    ClassToInstanceMap<Attribute<?>> attributes;
     Set<PreprocessorUnit> preprocessorUnits = new HashSet<>();
 
-    public Style(Attribute<?>... attributes) {
-        this.attributes = Stream.of(attributes).map(attr -> Map.entry((Class<? extends Attribute<?>>) attr.getClass(), attr))
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Style(Attribute... attributes) {
+        this.attributes = ImmutableClassToInstanceMap
+                .copyOf(Arrays.stream(attributes)
+                        .collect(Collectors.toMap((Function<Attribute, ? extends Class<? extends Attribute>>) Attribute::getClass, Function.identity())));
     }
 
     public <T> Attribute<T> getAttribute(Class<? extends Attribute<T>> attributeClass) {
-        return (Attribute<T>) attributes.get(attributeClass);
+        return attributes.getInstance(attributeClass);
     }
 
     public String preprocess(String input) {
@@ -39,6 +45,10 @@ public abstract class Style
     }
 
     public Set<Attribute<?>> attributes() {
-        return ImmutableSet.copyOf(attributes.values());
+        return ImmutableSet.copyOf(this.attributes.values());
+    }
+
+    public void applyAttributes(Renderable input) {
+        attributes().forEach(attribute -> attribute.display(this::preprocess, input));
     }
 }

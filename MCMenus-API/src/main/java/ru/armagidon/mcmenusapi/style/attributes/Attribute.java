@@ -3,36 +3,48 @@ package ru.armagidon.mcmenusapi.style.attributes;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import ru.armagidon.mcmenusapi.data.StyleParsingContext;
+import ru.armagidon.mcmenusapi.menu.Renderable;
 import ru.armagidon.mcmenusapi.style.AttributeParser;
+import ru.armagidon.mcmenusapi.style.AttributePresenter;
 
-import java.util.function.BiConsumer;
+import java.lang.annotation.Annotation;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public interface Attribute<T>
 {
     T get();
+
     T getDefault();
+
     void setRaw(StyleParsingContext<?> raw);
+
     void set(T newValue);
+
     void setDefault(T newDefault);
+
     void setUpdateFunction(Consumer<Attribute<T>> updateFunction);
+
+    void display(UnaryOperator<String> usePreprocessor, Renderable input);
+
     default void reset() {
         set(getDefault());
     }
 
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    abstract class SimpleAttribute<T> implements Attribute<T> {
+    abstract class ParsedAttribute<A extends Annotation, T> implements Attribute<T> {
 
         volatile T defaultValue;
         volatile T value;
-        final AttributeParser<T> parser;
         volatile Consumer<Attribute<T>> updateFunction = (a) -> {};
+        final AttributeParser<A, T> parser;
+        final AttributePresenter<Attribute<T>> presenter;
 
-        protected SimpleAttribute(T defaultValue, AttributeParser<T> parser) {
+        protected ParsedAttribute(T defaultValue, AttributeParser<A, T> parser, AttributePresenter<Attribute<T>> presenter) {
             this.defaultValue = defaultValue;
             this.value = defaultValue;
             this.parser = parser;
+            this.presenter = presenter;
         }
 
         @Override
@@ -63,32 +75,14 @@ public interface Attribute<T>
 
         @Override
         public void setRaw(StyleParsingContext<?> raw) {
-            parser.parse(this, raw);
-        }
-    }
-
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    abstract class FunctionAttribute<T, U> extends SimpleAttribute<U> {
-
-        T value;
-        Function<T, U> getter;
-        BiConsumer<T, U> setter;
-
-        protected FunctionAttribute(U defaultValue, T value, Function<T, U> getter, BiConsumer<T, U> setter, AttributeParser<U> parser) {
-            super(defaultValue, parser);
-            this.value = value;
-            this.getter = getter;
-            this.setter = setter;
+            if (raw.isAnnotationPresent(parser.getAnnotationClass())) {
+                setDefault(parser.parse(raw.getData(parser.getAnnotationClass())));
+            }
         }
 
         @Override
-        public U get() {
-            return getter.apply(value);
-        }
-
-        @Override
-        public void set(U newValue) {
-            setter.accept(value, newValue);
+        public void display(UnaryOperator<String> usePreprocessor, Renderable input) {
+            presenter.present(this, usePreprocessor, input);
         }
     }
 }

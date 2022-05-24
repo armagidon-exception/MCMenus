@@ -1,4 +1,4 @@
-package ru.armagidon.mcmenusapi.elements;
+package ru.armagidon.mcmenusapi.menu.elements;
 
 import org.bukkit.entity.Player;
 

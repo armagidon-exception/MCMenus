@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import ru.armagidon.mcmenusapi.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
 import ru.armagidon.mcmenusapi.misc.MenuAPIConstants;
 
 

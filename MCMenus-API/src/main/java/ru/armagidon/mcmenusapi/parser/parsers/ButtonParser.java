@@ -1,8 +1,8 @@
 package ru.armagidon.mcmenusapi.parser.parsers;
 
 import ru.armagidon.mcmenusapi.data.ElementParsingContext;
-import ru.armagidon.mcmenusapi.elements.Button;
-import ru.armagidon.mcmenusapi.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.Button;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
 import ru.armagidon.mcmenusapi.parser.ElementParser;
 import ru.armagidon.mcmenusapi.parser.tags.ButtonTag;
 

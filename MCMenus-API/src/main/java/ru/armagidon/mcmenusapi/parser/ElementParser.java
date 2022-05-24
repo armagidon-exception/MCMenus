@@ -2,7 +2,7 @@ package ru.armagidon.mcmenusapi.parser;
 
 import ru.armagidon.mcmenusapi.data.StyleParsingContext;
 import ru.armagidon.mcmenusapi.data.ElementParsingContext;
-import ru.armagidon.mcmenusapi.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +24,6 @@ public interface ElementParser<A extends Annotation, T> {
     ElementType mayBeAttachedTo();
 
     Class<A> getAnnotationClass();
-
 
     default void syntaxCheck(Class<T> inputType, A annotationData) throws ParsingException {}
 }

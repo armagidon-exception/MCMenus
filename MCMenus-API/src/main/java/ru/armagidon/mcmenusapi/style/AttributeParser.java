@@ -1,11 +1,27 @@
 package ru.armagidon.mcmenusapi.style;
 
-import ru.armagidon.mcmenusapi.data.StyleParsingContext;
-import ru.armagidon.mcmenusapi.style.attributes.Attribute;
+import java.lang.annotation.Annotation;
+import java.util.function.Function;
 
 //A - annotation type, I - input type
-@FunctionalInterface
-public interface AttributeParser<T>
+
+public interface AttributeParser<A extends Annotation, T>
 {
-    void parse(Attribute<T> target, StyleParsingContext<?> input);
+    T parse(A annotation);
+    Class<A> getAnnotationClass();
+
+    static <A extends Annotation, T> AttributeParser<A, T> createParser(Class<A> annotationClazz, Function<A, T> function) {
+        return new AttributeParser<>() {
+            @Override
+            public T parse(A annotation) {
+                return function.apply(annotation);
+            }
+
+            @Override
+            public Class<A> getAnnotationClass() {
+                return annotationClazz;
+            }
+        };
+    }
+
 }

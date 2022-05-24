@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(value = {ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ItemTexturePath
+public @interface ItemTextureAttribute
 {
-    String path();
+    String value();
 }
