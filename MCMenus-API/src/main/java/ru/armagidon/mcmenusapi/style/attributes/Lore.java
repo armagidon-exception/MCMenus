@@ -15,16 +15,6 @@ import static ru.armagidon.mcmenusapi.style.AttributeParser.createParser;
 @ToString
 public class Lore extends Attribute.ParsedAttribute<LoreAttribute, List<String>> {
 
-
-    private static final AttributePresenter<Attribute<List<String>>> PRESENTER = (attribute, usePreprocessor, input) -> {
-        if (input instanceof RenderedElement renderedElement) {
-            renderedElement.setLore(attribute.get().stream()
-                    .map(usePreprocessor)
-                    .map(AttributePresenter::colorize)
-                    .toList());
-        }
-    };
-
     private static final Function<LoreAttribute, List<String>> PARSER = (input) -> {
         if (input.isPath()) {
             return MCMenusAPI.getItemLoreRegistry().getByPath(input.lore()[0]);
@@ -34,7 +24,14 @@ public class Lore extends Attribute.ParsedAttribute<LoreAttribute, List<String>>
     };
 
     private Lore(List<String> lore) {
-        super(lore, createParser(LoreAttribute.class, PARSER), PRESENTER);
+        super(lore, createParser(LoreAttribute.class, PARSER), (attribute, usePreprocessor, input) -> {
+            if (input instanceof RenderedElement renderedElement) {
+                renderedElement.setLore(attribute.get().stream()
+                        .map(usePreprocessor)
+                        .map(AttributePresenter::colorize)
+                        .toList());
+            }
+        });
     }
 
     public static Lore of(String... lore) {

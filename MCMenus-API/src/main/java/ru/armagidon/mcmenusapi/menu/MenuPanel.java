@@ -8,35 +8,31 @@ import lombok.experimental.NonFinal;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import ru.armagidon.mcmenusapi.menu.container.Container;
+import ru.armagidon.mcmenusapi.menu.elements.DivisionBlock;
 import ru.armagidon.mcmenusapi.menu.elements.MenuDOM;
 import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
-import ru.armagidon.mcmenusapi.menu.elements.RenderedElement;
-import ru.armagidon.mcmenusapi.misc.MenuAPIConstants;
-import ru.armagidon.mcmenusapi.style.ElementStyle;
+import ru.armagidon.mcmenusapi.menu.layout.BlockLayout;
+import ru.armagidon.mcmenusapi.menu.layout.Dimension;
+import ru.armagidon.mcmenusapi.menu.layout.Layout;
+import ru.armagidon.mcmenusapi.menu.layout.Position;
 import ru.armagidon.mcmenusapi.style.FrameStyle;
 import ru.armagidon.mcmenusapi.style.MenuStyleSheet;
-import ru.armagidon.mcmenusapi.style.attributes.Lore;
 import ru.armagidon.mcmenusapi.style.attributes.MenuLookType;
-import ru.armagidon.mcmenusapi.style.attributes.TextureAttribute;
-import ru.armagidon.mcmenusapi.style.attributes.Title;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MenuPanel implements InventoryHolder
+public class MenuPanel implements InventoryHolder, Container
 {
 
     MenuDOM menuDOM;
@@ -45,6 +41,7 @@ public class MenuPanel implements InventoryHolder
     @Getter Player viewer;
     @NonFinal final MenuCanvas canvas;
     @NonFinal volatile boolean shown;
+    @Getter @NonFinal volatile Layout layout;
 
     public MenuPanel(String id, Player viewer) {
         Validate.notEmpty(id);
@@ -73,7 +70,7 @@ public class MenuPanel implements InventoryHolder
         if (!shown) return;
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             styleSheet.getFrameStyle().addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input));
-            menuDOM.entrySet().stream().map(Map.Entry::getKey).map(styleSheet::getStyle).forEach(style ->
+            menuDOM.entrySet().stream().map(Map.Entry::getKey).map(styleSheet::getStyle).filter(Objects::nonNull).forEach(style ->
                     style.addPreprocessorUnit(input -> PlaceholderAPI.setPlaceholders(viewer, input)));
         }
         refresh(true);
@@ -87,25 +84,6 @@ public class MenuPanel implements InventoryHolder
         return styleSheet;
     }
 
-    private int getFreeSlot() {
-        final FrameStyle frameStyle = styleSheet.getFrameStyle();
-        final FrameStyle.LookAndFeelProperties lookAndFeelProperties = frameStyle.getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
-        final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
-        final int columns = lookAndFeel.getElementsMinimum();
-        int menuSize = getMenuSize(lookAndFeelProperties);
-        if (!lookAndFeel.equals(MenuLookType.NORMAL))
-            menuSize = columns;
-        return IntStream.
-                rangeClosed(1, menuSize)
-                .filter(i -> menuDOM
-                        .entrySet()
-                        .stream()
-                        .map(Map.Entry::getValue)
-                        .map(MenuElement::getSlot)
-                        .noneMatch(s -> s == i))
-                .findFirst().getAsInt();
-    }
-
     @NotNull
     @Override
     public Inventory getInventory() {
@@ -113,50 +91,54 @@ public class MenuPanel implements InventoryHolder
     }
 
     //Setting item
-    public void renderElement(int slot, MenuElement element) {
-        ElementStyle elementStyle = styleSheet.getStyle(element.getId());
-
-        if (slot < 1) slot = 1;
-
-        RenderedElement renderedElement = RenderedElement.create(Material.STONE);
-        elementStyle.applyAttributes(renderedElement);
-        ItemStack item = renderedElement.asItemStack();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        meta.getPersistentDataContainer().set(MenuAPIConstants.uiElementInventoryTag(), PersistentDataType.STRING, element.getId());
-        item.setItemMeta(meta);
-
-        canvas.setItem(slot - 1, item);
-    }
-
-    private int  getMenuSize(FrameStyle.LookAndFeelProperties lookAndFeelProperties) {
-        final int rows = lookAndFeelProperties.getMenuSize();
-        final MenuLookType lookAndFeel = lookAndFeelProperties.getLookType();
-        final int columns = lookAndFeel.getElementsMinimum();
-        return rows * columns;
+    public void renderElement(Position position, MenuElement element) {
+        element.render(position, this);
     }
 
     public void refresh(boolean rerender) {
         if (!shown) return;
-        final FrameStyle frameStyle = styleSheet.getFrameStyle();
         if (rerender) {
             //Phase #1 Setting menu's properties
             styleSheet.getFrameStyle().applyAttributes(canvas);
         }
+
         //Phase #3 Render elements
-        menuDOM.entrySet().stream().map(Map.Entry::getValue).forEach(element ->
-                renderElement(element.getSlot(), element));
+        FrameStyle.LookAndFeelProperties properties = getStyleSheet().getFrameStyle().getAttribute(FrameStyle.LookAndFeelAttribute.class).get();
+        layout.apply(menuDOM.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableSet()), new Position(), new Dimension(properties.getLookType().getElementsMinimum(), properties.getMenuSize()))
+                .forEach((key, value) -> renderElement(value, key));
         if (!rerender)
             viewer.updateInventory();
     }
 
-    public void addElement(MenuElement element, ElementStyle style) {
-        int freeSlot = getFreeSlot();
-        element.setSlot(freeSlot);
-
+    public void addElement(MenuElement element) {
         menuDOM.addElement(element);
-
-        styleSheet.setStyle(element.getId(), style);
     }
 
+    @Override
+    public MenuElement getElement(String id) {
+        MenuElement foundElement = menuDOM.getElement(id);
+        if (foundElement == null) {
+            Optional<MenuElement> nestedElement = getChildren().stream()
+                    .filter(e -> e instanceof DivisionBlock)
+                    .map(e -> (DivisionBlock) e).filter(d -> d.getElement(id) != null)
+                    .map(d -> d.getElement(id)).findFirst();
+            return nestedElement.orElse(null);
+        }
+        return foundElement;
+    }
+
+    @Override
+    public Set<MenuElement> getChildren() {
+        return menuDOM.entrySet().stream()
+                .map(Map.Entry::getValue).collect(Collectors.toUnmodifiableSet());
+    }
+
+    @Override
+    public void setLayout(Layout layout) {
+        this.layout = layout;
+    }
+
+    public MenuCanvas getCanvas() {
+        return canvas;
+    }
 }

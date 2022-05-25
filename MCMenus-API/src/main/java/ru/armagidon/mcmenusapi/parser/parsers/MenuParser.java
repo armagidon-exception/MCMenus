@@ -4,18 +4,18 @@ import lombok.SneakyThrows;
 import org.bukkit.entity.Player;
 import ru.armagidon.mcmenusapi.data.ElementParsingContext;
 import ru.armagidon.mcmenusapi.data.StyleParsingContext;
-import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
 import ru.armagidon.mcmenusapi.menu.Menu;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
+import ru.armagidon.mcmenusapi.menu.elements.DivisionBlock;
+import ru.armagidon.mcmenusapi.menu.elements.MenuElement;
+import ru.armagidon.mcmenusapi.menu.layout.Layout;
+import ru.armagidon.mcmenusapi.menu.layout.Position;
 import ru.armagidon.mcmenusapi.misc.Reflection;
 import ru.armagidon.mcmenusapi.misc.jool.StreamUtils;
 import ru.armagidon.mcmenusapi.misc.jool.Unchecked;
 import ru.armagidon.mcmenusapi.parser.ElementParser;
 import ru.armagidon.mcmenusapi.parser.ParsingException;
-import ru.armagidon.mcmenusapi.parser.tags.ButtonTag;
-import ru.armagidon.mcmenusapi.parser.tags.CheckBoxTag;
-import ru.armagidon.mcmenusapi.parser.tags.LinkTag;
-import ru.armagidon.mcmenusapi.parser.tags.RefreshFunction;
+import ru.armagidon.mcmenusapi.parser.tags.*;
 import ru.armagidon.mcmenusapi.style.ElementStyle;
 
 import java.lang.annotation.Annotation;
@@ -24,6 +24,7 @@ import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -34,12 +35,24 @@ import java.util.stream.Stream;
 public class MenuParser
 {
 
-    private static final Map<Class<? extends Annotation>, ElementParser<? extends Annotation, ?>> parsers = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends Annotation>, ElementParser<? extends Annotation, ?>> elementParser = new ConcurrentHashMap<>();
+    private static final Map<Class<? extends Annotation>, Function<? extends Annotation, Layout>> layoutParsers = new ConcurrentHashMap<>();
 
     static {
-        parsers.put(LinkTag.class, new LinkParser());
-        parsers.put(ButtonTag.class, new ButtonParser());
-        parsers.put(CheckBoxTag.class, new CheckBoxParser());
+        elementParser.put(LinkTag.class, new LinkParser());
+        elementParser.put(ButtonTag.class, new ButtonParser());
+        elementParser.put(CheckBoxTag.class, new CheckBoxParser());
+
+        registerLayoutParser(BlockLayout.class, blockLayout -> ru.armagidon.mcmenusapi.menu.layout.BlockLayout.create(blockLayout.width(), blockLayout.height()));
+    }
+
+    private static <A extends Annotation> void registerLayoutParser(Class<A> clazz,
+                                                                    Function<A, Layout> factoryFunction) {
+        layoutParsers.put(clazz, factoryFunction);
+    }
+
+    private static <A extends Annotation> Function<A, Layout> getLayoutFactory(Class<A> clazz) {
+        return (Function<A, Layout>) layoutParsers.get(clazz);
     }
 
 
@@ -56,22 +69,31 @@ public class MenuParser
         Method[] methods = dataModel.getClass().getDeclaredMethods();
         Field[] fields = dataModel.getClass().getDeclaredFields();
 
-        Supplier<Stream<AccessibleObject>> memberStream = () -> Stream.concat(Arrays.stream(methods), Arrays.stream(fields));
+        Supplier<Stream<AccessibleObject>> memberStream = () -> Stream.concat(Arrays.stream(methods),
+                Arrays.stream(fields));
 
-        parsers.values().forEach(parser -> memberStream.get().forEach(member -> acceptMember(member, parser, owner, defaultPanel)));
+        elementParser.values().forEach(parser -> memberStream.get()
+                .forEach(member -> acceptMember(member, parser, owner, defaultPanel)));
 
         SearchCriteria.builder()
                 .type(Runnable.class)
                 .annotated(RefreshFunction.class)
                 .build().search(fields)
                 .map(Field.class::cast)
-                .findFirst().ifPresent(Unchecked.consumer(f -> {
-                    f.setAccessible(true);
-                    Runnable refreshFunction = () -> defaultPanel.refresh(false);
-                    f.set(dataModel, refreshFunction);
-                }));
+                .findFirst().ifPresent(Unchecked.consumer(f ->
+                        Reflection.setFDataSafe(f, dataModel, (Runnable) () ->
+                                defaultPanel.refresh(false))));
 
         return new ParseResult(defaultPanel, dataModel);
+    }
+
+    private static void parseAbsoluteLayout(AccessibleObject m, MenuElement element, Map<MenuElement, Position> positionMap) {
+        if (m.isAnnotationPresent(AbsolutePosition.class)) {
+            if (elementParser.keySet().stream().anyMatch(m::isAnnotationPresent)) {
+                AbsolutePosition p = m.getAnnotation(AbsolutePosition.class);
+                positionMap.put(element, new Position(p.x(), p.y()));
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -80,7 +102,6 @@ public class MenuParser
         if (!member.isAnnotationPresent(parser.getAnnotationClass())) return;
         var parseContextBuilder = ElementParsingContext.<A, I>builder()
                 .annotationData(member.getAnnotation(parser.getAnnotationClass())).owner(owner).parent(panel);
-
         if (member instanceof Method method) {
             if (!parser.mayBeAttachedTo().equals(ElementType.METHOD)) {
                 throw new ParsingException("You cannot apply tag " + parser.getAnnotationClass().getTypeName() + " to method class member");
@@ -100,6 +121,7 @@ public class MenuParser
             if (data == null) return;
 
             if (data instanceof List || data.getClass().isArray()) {
+                DivisionBlock div = new DivisionBlock(UUID.randomUUID().toString());
 
                 Stream<I> objectStream;
                 Function<Integer, I> getter;
@@ -114,16 +136,30 @@ public class MenuParser
                     setter = (index, newValue) -> Array.set(data, index, newValue);
                     objectStream = IntStream.range(0, Array.getLength(data)).mapToObj(getter::apply);
                 }
+
                 objectStream.forEach(StreamUtils.consumerWithCounter(Unchecked.biConsumer((counter, element) -> {
                     parser.syntaxCheck((Class<I>) element.getClass(), field.getAnnotation(parser.getAnnotationClass()));
-                    parseAndAddElement(ElementParsingContext.<A, I>builder()
+
+                    layoutParsers.keySet().stream().filter(field::isAnnotationPresent).findFirst().ifPresent(clazz -> {
+                        Function<Annotation, Layout> factory = getLayoutFactory((Class<Annotation>) clazz);
+                        var layout = factory.apply(field.getAnnotation(clazz));
+                        div.setLayout(layout);
+                    });
+
+                    var context = ElementParsingContext.<A, I>builder()
                             .parent(panel)
                             .owner(owner)
                             .annotationData(member.getAnnotation(parser.getAnnotationClass()))
                             .dataGetter(Unchecked.supplier(() -> getter.apply(counter)))
                             .dataSetter(Unchecked.consumer((o) -> setter.accept(counter, o)))
-                            .build(), parser, field);
+                            .build();
+                    MenuElement parsedElement = parser.parse(context);
+                    ElementStyle style = parser.parseStyle(StyleParsingContext.createContext(context.getParent(), context.getDataGetter(), field::getAnnotation));
+                    div.addElement(parsedElement);
+                    panel.getStyleSheet().setStyle(parsedElement.getId(), style);
                 })));
+
+                panel.addElement(div);
                 return;
             }
 
@@ -134,13 +170,11 @@ public class MenuParser
                     .dataSetter(Unchecked.consumer((o) -> Reflection.setFDataSafe(field, owner.getModelFor(panel), o)));
         }
 
-        parseAndAddElement(parseContextBuilder.build(), parser, member);
-    }
-
-    private static <A extends Annotation, I> void parseAndAddElement(ElementParsingContext<A, I> context, ElementParser<A, I> parser, AnnotatedElement object) {
+        var context = parseContextBuilder.build();
         MenuElement element = parser.parse(context);
-        ElementStyle style = parser.parseStyle(StyleParsingContext.createContext(context.getParent(), context.getDataGetter(), object::getAnnotation));
-        context.getParent().addElement(element, style);
+        ElementStyle style = parser.parseStyle(StyleParsingContext.createContext(context.getParent(), context.getDataGetter(), member::getAnnotation));
+        context.getParent().addElement(element);
+        context.getParent().getStyleSheet().setStyle(element.getId(), style);
     }
 
     public record ParseResult(MenuPanel result, Object proxiedDataModel) {}

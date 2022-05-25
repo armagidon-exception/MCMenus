@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import ru.armagidon.mcmenusapi.menu.MenuPanel;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class Link extends MenuElement
+public class Link extends ItemMenuElement
 {
     @Getter
     MenuPanel link;

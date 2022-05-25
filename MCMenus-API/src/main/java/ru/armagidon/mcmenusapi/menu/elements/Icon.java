@@ -2,7 +2,7 @@ package ru.armagidon.mcmenusapi.menu.elements;
 
 import org.bukkit.entity.Player;
 
-public class Icon extends MenuElement
+public class Icon extends ItemMenuElement
 {
 
     public Icon(String id) {

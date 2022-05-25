@@ -8,6 +8,7 @@ import ru.armagidon.mcmenusapi.style.AttributeParser;
 import ru.armagidon.mcmenusapi.style.AttributePresenter;
 
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -38,9 +39,9 @@ public interface Attribute<T>
         volatile T value;
         volatile Consumer<Attribute<T>> updateFunction = (a) -> {};
         final AttributeParser<A, T> parser;
-        final AttributePresenter<Attribute<T>> presenter;
+        final AttributePresenter<T> presenter;
 
-        protected ParsedAttribute(T defaultValue, AttributeParser<A, T> parser, AttributePresenter<Attribute<T>> presenter) {
+        protected ParsedAttribute(T defaultValue, AttributeParser<A, T> parser, AttributePresenter<T> presenter) {
             this.defaultValue = defaultValue;
             this.value = defaultValue;
             this.parser = parser;
@@ -49,7 +50,7 @@ public interface Attribute<T>
 
         @Override
         public void setUpdateFunction(Consumer<Attribute<T>> updateFunction) {
-            this.updateFunction = updateFunction;
+            this.updateFunction = Objects.requireNonNullElseGet(updateFunction, () -> a -> {});
         }
 
         @Override

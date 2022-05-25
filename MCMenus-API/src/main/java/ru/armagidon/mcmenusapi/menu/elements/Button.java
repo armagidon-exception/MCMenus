@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 
 import java.util.function.Consumer;
 
-public class Button extends MenuElement
+public class Button extends ItemMenuElement
 {
 
     private final Consumer<Button> action;

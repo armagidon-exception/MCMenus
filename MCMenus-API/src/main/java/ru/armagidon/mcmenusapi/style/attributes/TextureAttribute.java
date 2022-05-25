@@ -17,14 +17,12 @@ public class TextureAttribute extends Attribute.ParsedAttribute<ItemTextureAttri
     private static final Function<ItemTextureAttribute, ItemStack> PARSER = (input) ->
             MCMenusAPI.getItemTextureRegistry().getByPath(input.value());
 
-    private static final AttributePresenter<Attribute<ItemStack>> PRESENTER = (attribute, usePreprocessor, input) -> {
-        if (input instanceof RenderedElement renderedElement) {
-            renderedElement.setItem(attribute.get());
-        }
-    };
-
     private TextureAttribute(ItemStack defaultValue) {
-        super(defaultValue.clone(), createParser(ItemTextureAttribute.class, PARSER), PRESENTER);
+        super(defaultValue.clone(), createParser(ItemTextureAttribute.class, PARSER), (attribute, usePreprocessor, input) -> {
+            if (input instanceof RenderedElement renderedElement) {
+                renderedElement.setItem(attribute.get());
+            }
+        });
     }
 
     public static TextureAttribute of(ItemStack texture) {

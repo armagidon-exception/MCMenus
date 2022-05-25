@@ -13,8 +13,8 @@ import org.bukkit.event.inventory.InventoryType;
 public enum MenuLookType
 {
     NORMAL(InventoryType.CHEST, 9), /*Normal chest inventory*/
-    SHORT_ROW(InventoryType.HOPPER, 5), /*Hopper Inventory*/
-    RESULTING_GRID(InventoryType.CRAFTING, 10); /*Crafting Table*/
+    SHORT_ROW(InventoryType.HOPPER, 5); /*Hopper Inventory*/
+    //RESULTING_GRID(InventoryType.CRAFTING, 10); /*Crafting Table*/
 
     InventoryType inventoryType;
     int elementsMinimum;

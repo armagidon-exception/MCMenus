@@ -2,14 +2,12 @@ package ru.armagidon.mcmenusapi.misc;
 
 import org.bukkit.NamespacedKey;
 
-import java.util.function.BiFunction;
-
 
 /**None of these constants should ever be used in static context*/
 public class MenuAPIConstants
 {
 
-    public static NamespacedKey uiElementInventoryTag() {
+    public static NamespacedKey elementTag() {
         return MenuAPIConstantsHolder.UI_ELEMENT_INVENTORY_KEY;
     }
 

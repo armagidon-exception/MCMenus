@@ -6,15 +6,12 @@ import ru.armagidon.mcmenusapi.style.attributes.Attribute;
 
 import java.util.function.UnaryOperator;
 
-public interface AttributePresenter<A extends Attribute<?>>
+public interface AttributePresenter<T>
 {
-
-    void present(A attribute, UnaryOperator<String> usePreprocessor, Renderable input);
 
     static String colorize(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
-
-
+    void present(Attribute<T> attribute, UnaryOperator<String> usePreprocessor, Renderable input);
 }

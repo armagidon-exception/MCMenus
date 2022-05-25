@@ -1,10 +1,12 @@
 package ru.armagidon.mcmenusapi.menu.elements;
 
 import lombok.ToString;
+import ru.armagidon.mcmenusapi.menu.layout.Position;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @ToString
 public class MenuDOM

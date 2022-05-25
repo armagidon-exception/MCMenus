@@ -40,11 +40,11 @@ public class SchemaMenuController implements Listener
                 return;
             }
             ItemMeta meta = stack.getItemMeta();
-            if (!meta.getPersistentDataContainer().getKeys().contains(MenuAPIConstants.uiElementInventoryTag())) {
+            if (!meta.getPersistentDataContainer().getKeys().contains(MenuAPIConstants.elementTag())) {
                 return;
             }
-            String elementId = meta.getPersistentDataContainer().get(MenuAPIConstants.uiElementInventoryTag(), PersistentDataType.STRING);
-            MenuElement element = display.getMenuDOM().getElement(elementId);
+            String elementId = meta.getPersistentDataContainer().get(MenuAPIConstants.elementTag(), PersistentDataType.STRING);
+            MenuElement element = display.getElement(elementId);
             if (element == null) {
                 return;
             }

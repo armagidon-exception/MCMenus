@@ -22,17 +22,16 @@ public class Title extends Attribute.ParsedAttribute<TitleAttribute, String> {
                 return input.title();
     };
 
-    private static final AttributePresenter<Attribute<String>> PRESENTER = (attribute, usePreprocessor, input) -> {
-        String title = colorize(usePreprocessor.apply(attribute.get()));
-        if (input instanceof MenuCanvas canvas) {
-            canvas.setTitle(title);
-        } else if (input instanceof RenderedElement renderedElement) {
-            renderedElement.setDisplayName(title);
-        }
-    };
 
     private Title(String defaultValue) {
-        super(defaultValue, createParser(TitleAttribute.class, TITlE_PARSER), PRESENTER);
+        super(defaultValue, createParser(TitleAttribute.class, TITlE_PARSER), (attribute, usePreprocessor, input) -> {
+            String title = colorize(usePreprocessor.apply(attribute.get()));
+            if (input instanceof MenuCanvas canvas) {
+                canvas.setTitle(title);
+            } else if (input instanceof RenderedElement renderedElement) {
+                renderedElement.setDisplayName(title);
+            }
+        });
     }
 
     public static Title of(String input) {
